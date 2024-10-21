@@ -1,0 +1,9 @@
+base:
+  project_name: youtube-comment-sentiment-analysis
+  target: category
+
+load_dataset:
+  bucket: plugindataset
+  filename: data/Twitter_Data.csv
+  raw_data: /data/raw
+  
