@@ -2,15 +2,46 @@
 import re
 import yaml
 import nltk  # type: ignore
+import mlflow
 import pathlib
+import dagshub  # type: ignore
 import numpy as np
 import pandas as pd
+from scipy import sparse
+from typing import Tuple
 from nltk.corpus import stopwords  # type: ignore
 from nltk.stem import WordNetLemmatizer  # type: ignore
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
 from src.logger import infologger
 
 
-def preprocess_text(comment: str) -> str:
+def loadData(path: str) -> pd.DataFrame:  # step-1
+    try:
+        infologger.info(f"data loaded successfully!")
+        return pd.read_csv(path)
+    except Exception as e:
+        infologger.info(f"unable to load the data [check load_data()]. exc: {e}")
+
+
+def trainTestSplit(
+    X: pd.DataFrame, y: pd.Series, test_size: float = 0.25, seed: int = 42
+) -> Tuple[pd.DataFrame, ...]:
+    try:
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=test_size, stratify=y, random_state=seed
+        )
+
+    except Exception as e:
+        infologger.info(f"unable to split the data [check split_data()]. exc: {e}")
+    else:
+        infologger.info(
+            f"data splited successfully with test_size: {test_size} & seed: {seed}"
+        )
+        return X_train, X_test, y_train, y_test
+
+
+def preprocessText(comment: str) -> str:
 
     # drop na
     # df = df.dropna()
@@ -78,15 +109,15 @@ def preprocess_text(comment: str) -> str:
     return comment
 
 
-def clean_data(df: pd.DataFrame) -> pd.DataFrame:
+def cleanData(df: pd.DataFrame) -> pd.DataFrame:
     # remove nan
     # drop nan/duplicates/empty comments
-    df = df.dropna(subset=["clean_text", "category"])
+    df = df.dropna()
     df = df.drop_duplicates(subset="clean_text")
     df = df[~(df["clean_text"].str.strip() == "")]
 
     # apply preprocessing on comments
-    df["clean_text"] = df["clean_text"].apply(preprocess_text)
+    df["clean_text"] = df["clean_text"].apply(preprocessText)
 
     # load stopwords from nltk
     nltk.download("stopwords")
@@ -121,31 +152,31 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def feature_extraction(
-    data: pd.DataFrame, extractor: str = "bow", splitting: str = "unigram"
+def featureExtraction(
+    data: pd.DataFrame,
+    extractor: str = "bow",
+    splitting: str = (
+        1,
+        1,
+    ),  # (1,1)-unigram (2,2)-bigram (3,3)-trigram (1,2)-uni+bi (2,3)-bi+tri (1,3)-uni+bi+tri
+    max_features: int = 15000,
 ) -> np.ndarray:
-    # peform BoW & TF-IDF
-    # put both options
-    # try unigram/bi-gram/tri-gram
-    # mlflow to track performance
-
-    pass
-
-
-def load_data(path: str) -> pd.DataFrame:
     try:
-        infologger.info(f"data loaded successfully!")
-        return pd.read_csv(path)
+        vectorizer = CountVectorizer(max_features=max_features, ngram_range=splitting)
+        x = vectorizer.fit_transform(data).toarray()
+        infologger.info(f"features extracted successfully...")
     except Exception as e:
-        infologger.info(f"unable to load the data [check load_data()]. exc: {e}")
+        infologger.info(f"some issue in featureExtraction. Error: {e}")
+    else:
+        return x
 
 
-def save_data(df: pd.DataFrame, path: str) -> None:
+def saveData(df: pd.DataFrame, path: str) -> None:
     try:
-        df.to_csv(path, index=False)
+        df.to_csv(path)
         infologger.info(f"data saved successfully!")
     except Exception as e:
-        infologger.info(f"unable to save the data [check save_data()]. exc: {e}")
+        infologger.info(f"unable to save the data [check saveData()]. exc: {e}")
 
 
 def main():
@@ -155,8 +186,10 @@ def main():
     params_file_path = yaml.safe_load(open(f"{home_dir}/params.yaml"))
     params = params_file_path["build_features"]
 
-    df = load_data(f"{home_dir}/{params['file_path']}")
-    df_processed = clean_data(df)
+    df = loadData(f"{home_dir}/{params['file_path']}")  # step-1
+    clean_data = cleanData(df)  # step-2
+    X, y = clean_data["clean_text"], clean_data["category"]
+    X_train, X_test, y_train, y_test = trainTestSplit(X, y)  # step-3
 
 
 if __name__ == "__main__":
