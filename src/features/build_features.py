@@ -10,6 +10,7 @@ from typing import Tuple
 from nltk.corpus import stopwords  # type: ignore
 from nltk.stem import WordNetLemmatizer  # type: ignore
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from src.logger import infologger
 
@@ -62,7 +63,7 @@ def preprocessText(comment: str) -> str:  # step-3
     url_pattern = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
     comment = re.sub(url_pattern, "", comment)
     comment = re.sub(r"\n", " ", comment)
-    # remove unusual characters    
+    # remove unusual characters
     comment = re.sub(r"[^a-zA-Z0-9\s₹!?.,]", "", comment)
     # remove extra comments
     comment = re.sub(r"\s+", " ", comment)
@@ -71,7 +72,7 @@ def preprocessText(comment: str) -> str:  # step-3
     return comment
 
 
-def cleanData(df: pd.DataFrame) -> pd.DataFrame:        # step-4
+def cleanData(df: pd.DataFrame) -> pd.DataFrame:  # step-4
     # remove nan
     # drop nan/duplicates/empty comments
     df = df.dropna()
@@ -114,26 +115,38 @@ def cleanData(df: pd.DataFrame) -> pd.DataFrame:        # step-4
     return df
 
 
-def featureExtraction(          # step-5
+def featureExtraction(  # step-5
     data: pd.DataFrame,
     extractor: str = "bow",
-    splitting: str = (
+    splitting: Tuple = (
         1,
         1,
     ),  # (1,1)-unigram (2,2)-bigram (3,3)-trigram (1,2)-uni+bi (2,3)-bi+tri (1,3)-uni+bi+tri
     max_features: int = 15000,
 ) -> np.ndarray:
-    try:
-        vectorizer = CountVectorizer(max_features=max_features, ngram_range=splitting)
-        x = vectorizer.fit_transform(data).toarray()
-        infologger.info(f"features extracted successfully...")
-    except Exception as e:
-        infologger.info(f"some issue in featureExtraction. Error: {e}")
-    else:
-        return x
+    if extractor == "BoW" or extractor == "bow":
+        try:
+            vectorizer = CountVectorizer(
+                max_features=max_features, ngram_range=splitting
+            )
+            x = vectorizer.fit_transform(data).toarray()
+            infologger.info(f"features extracted (bow) successfully...")
+        except Exception as e:
+            infologger.info(f"some issue in bow. Error: {e}")
+        else:
+            return x
+    elif extractor == "TF-IDF" or extractor == "tfidf":
+        try:
+            tfidf = TfidfVectorizer(max_features=max_features, ngram_range=splitting)
+            x = tfidf.fit_transform(data).toarray()
+            infologger.info(f"features extracted (tfidf) successfully...")
+        except Exception as e:
+            infologger.info(f"some issue in tfidf. Error: {e}")
+        else:
+            return x
 
 
-def saveData(df: pd.DataFrame, path: str) -> None:      # step-6
+def saveData(df: pd.DataFrame, path: str) -> None:  # step-6
     try:
         df.to_csv(path)
         infologger.info(f"data saved successfully!")
@@ -148,11 +161,11 @@ def main() -> None:
     params_file_path = yaml.safe_load(open(f"{home_dir}/params.yaml"))
     params = params_file_path["build_features"]
 
-    df = loadData(f"{home_dir}/{params['file_path']}")  
-    clean_data = cleanData(df) 
+    df = loadData(f"{home_dir}/{params['file_path']}")
+    clean_data = cleanData(df)
     saveData(clean_data, f"{home_dir}/data/processed/clean_data.csv")
     # X, y = clean_data["clean_text"], clean_data["category"]
-    # X_train, X_test, y_train, y_test = trainTestSplit(X, y) 
+    # X_train, X_test, y_train, y_test = trainTestSplit(X, y)
 
 
 if __name__ == "__main__":
