@@ -2,9 +2,7 @@
 import re
 import yaml
 import nltk  # type: ignore
-import mlflow
 import pathlib
-import dagshub  # type: ignore
 import numpy as np
 import pandas as pd
 from scipy import sparse
@@ -24,7 +22,7 @@ def loadData(path: str) -> pd.DataFrame:  # step-1
         infologger.info(f"unable to load the data [check load_data()]. exc: {e}")
 
 
-def trainTestSplit(
+def trainTestSplit(  # step-2
     X: pd.DataFrame, y: pd.Series, test_size: float = 0.25, seed: int = 42
 ) -> Tuple[pd.DataFrame, ...]:
     try:
@@ -41,11 +39,7 @@ def trainTestSplit(
         return X_train, X_test, y_train, y_test
 
 
-def preprocessText(comment: str) -> str:
-
-    # drop na
-    # df = df.dropna()
-
+def preprocessText(comment: str) -> str:  # step-3
     # remove emojies from comments
     emoji_pattern = re.compile(
         "["
@@ -59,57 +53,25 @@ def preprocessText(comment: str) -> str:
         "]+",
         flags=re.UNICODE,
     )
-
-    # df["clean_text"] = df["clean_text"].apply(lambda x: emoji_pattern.sub(" ", x))
     comment = re.sub(emoji_pattern, " ", comment)
-
-    # remove hindi characters from comments
+    # remove hindi comments
     hindi_pattern = re.compile(r"[\u0900-\u097F]")
-    # df["clean_text"] = df["clean_text"].apply(lambda x: hindi_pattern.sub(r" ", x))
     comment = re.sub(hindi_pattern, " ", comment)
-
-    # lowercase to all comments
-    # df["clean_text"] = df["clean_text"].str.lower()
     comment = comment.lower()
-
-    # remove URL"s from comments
-    # df["clean_text"] = df["clean_text"].apply(remove_urls)
+    # remove url's
     url_pattern = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
     comment = re.sub(url_pattern, "", comment)
-
-    # drop duplicates
-    # df = df.drop_duplicates()
-
-    # remove empty comments
-    # df = df[~(df["clean_text"].str.strip() == "")]
-
-    # replace newline characters
-    # df["clean_text"] = df["clean_text"].str.replace("\n", " ")
     comment = re.sub(r"\n", " ", comment)
-
-    # remove unusual characters
-    # df["clean_text"] = df["clean_text"].apply(
-    #     lambda x: re.sub(r"[^a-zA-Z0-9\s₹!?.,]", "", x)
-    # )
+    # remove unusual characters    
     comment = re.sub(r"[^a-zA-Z0-9\s₹!?.,]", "", comment)
-
-    # remove stopwords from comments
-    # df["clean_text"] = df["clean_text"].apply(
-    #     lambda x: " ".join([i for i in x.split() if i not in stopwords])
-    # )
-
-    # remove excessive space
-    # df["clean_text"] = df["clean_text"].str.replace(r"\s+", " ", regex=True)
+    # remove extra comments
     comment = re.sub(r"\s+", " ", comment)
-
-    # remove whitespace from begining and ending of comments
-    # df["clean_text"] = df["clean_text"].str.strip()
     comment = comment.strip()
 
     return comment
 
 
-def cleanData(df: pd.DataFrame) -> pd.DataFrame:
+def cleanData(df: pd.DataFrame) -> pd.DataFrame:        # step-4
     # remove nan
     # drop nan/duplicates/empty comments
     df = df.dropna()
@@ -152,7 +114,7 @@ def cleanData(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def featureExtraction(
+def featureExtraction(          # step-5
     data: pd.DataFrame,
     extractor: str = "bow",
     splitting: str = (
@@ -171,7 +133,7 @@ def featureExtraction(
         return x
 
 
-def saveData(df: pd.DataFrame, path: str) -> None:
+def saveData(df: pd.DataFrame, path: str) -> None:      # step-6
     try:
         df.to_csv(path)
         infologger.info(f"data saved successfully!")
@@ -179,17 +141,18 @@ def saveData(df: pd.DataFrame, path: str) -> None:
         infologger.info(f"unable to save the data [check saveData()]. exc: {e}")
 
 
-def main():
+def main() -> None:
     curr_dir = pathlib.Path(__file__)
     home_dir = curr_dir.parent.parent.parent.as_posix()
 
     params_file_path = yaml.safe_load(open(f"{home_dir}/params.yaml"))
     params = params_file_path["build_features"]
 
-    df = loadData(f"{home_dir}/{params['file_path']}")  # step-1
-    clean_data = cleanData(df)  # step-2
-    X, y = clean_data["clean_text"], clean_data["category"]
-    X_train, X_test, y_train, y_test = trainTestSplit(X, y)  # step-3
+    df = loadData(f"{home_dir}/{params['file_path']}")  
+    clean_data = cleanData(df) 
+    saveData(clean_data, f"{home_dir}/data/processed/clean_data.csv")
+    # X, y = clean_data["clean_text"], clean_data["category"]
+    # X_train, X_test, y_train, y_test = trainTestSplit(X, y) 
 
 
 if __name__ == "__main__":
