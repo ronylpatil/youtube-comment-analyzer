@@ -3,14 +3,10 @@ import re
 import yaml
 import nltk  # type: ignore
 import pathlib
-import numpy as np
 import pandas as pd
-from scipy import sparse
 from typing import Tuple
 from nltk.corpus import stopwords  # type: ignore
 from nltk.stem import WordNetLemmatizer  # type: ignore
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from src.logger import infologger
 
@@ -23,24 +19,7 @@ def loadData(path: str) -> pd.DataFrame:  # step-1
         infologger.info(f"unable to load the data [check load_data()]. exc: {e}")
 
 
-def trainTestSplit(  # step-2
-    X: pd.DataFrame, y: pd.Series, test_size: float = 0.25, seed: int = 42
-) -> Tuple[pd.DataFrame, ...]:
-    try:
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=test_size, stratify=y, random_state=seed
-        )
-
-    except Exception as e:
-        infologger.info(f"unable to split the data [check split_data()]. exc: {e}")
-    else:
-        infologger.info(
-            f"data splited successfully with test_size: {test_size} & seed: {seed}"
-        )
-        return X_train, X_test, y_train, y_test
-
-
-def preprocessText(comment: str) -> str:  # step-3
+def preprocessText(comment: str) -> str:  # step-2
     # remove emojies from comments
     emoji_pattern = re.compile(
         "["
@@ -65,14 +44,14 @@ def preprocessText(comment: str) -> str:  # step-3
     comment = re.sub(r"\n", " ", comment)
     # remove unusual characters
     comment = re.sub(r"[^a-zA-Z0-9\s₹!?.,]", "", comment)
-    # remove extra comments
+    # remove extra spaces
     comment = re.sub(r"\s+", " ", comment)
     comment = comment.strip()
 
     return comment
 
 
-def cleanData(df: pd.DataFrame) -> pd.DataFrame:  # step-4
+def cleanData(df: pd.DataFrame) -> pd.DataFrame:  # step-3
     # remove nan
     # drop nan/duplicates/empty comments
     df = df.dropna()
@@ -115,40 +94,9 @@ def cleanData(df: pd.DataFrame) -> pd.DataFrame:  # step-4
     return df
 
 
-def featureExtraction(  # step-5
-    data: pd.DataFrame,
-    extractor: str = "bow",
-    splitting: Tuple = (
-        1,
-        1,
-    ),  # (1,1)-unigram (2,2)-bigram (3,3)-trigram (1,2)-uni+bi (2,3)-bi+tri (1,3)-uni+bi+tri
-    max_features: int = 15000,
-) -> np.ndarray:
-    if extractor == "BoW" or extractor == "bow":
-        try:
-            vectorizer = CountVectorizer(
-                max_features=max_features, ngram_range=splitting
-            )
-            x = vectorizer.fit_transform(data).toarray()
-            infologger.info(f"features extracted (bow) successfully...")
-        except Exception as e:
-            infologger.info(f"some issue in bow. Error: {e}")
-        else:
-            return x
-    elif extractor == "TF-IDF" or extractor == "tfidf":
-        try:
-            tfidf = TfidfVectorizer(max_features=max_features, ngram_range=splitting)
-            x = tfidf.fit_transform(data).toarray()
-            infologger.info(f"features extracted (tfidf) successfully...")
-        except Exception as e:
-            infologger.info(f"some issue in tfidf. Error: {e}")
-        else:
-            return x
-
-
-def saveData(df: pd.DataFrame, path: str) -> None:  # step-6
+def saveData(df: pd.DataFrame, path: str) -> None:  # step-4
     try:
-        df.to_csv(path)
+        df.to_csv(path, index=False)
         infologger.info(f"data saved successfully!")
     except Exception as e:
         infologger.info(f"unable to save the data [check saveData()]. exc: {e}")
@@ -158,14 +106,12 @@ def main() -> None:
     curr_dir = pathlib.Path(__file__)
     home_dir = curr_dir.parent.parent.parent.as_posix()
 
-    params_file_path = yaml.safe_load(open(f"{home_dir}/params.yaml"))
+    params_file_path = yaml.safe_load(open(f"{home_dir}/params.yaml", encoding="utf-8"))
     params = params_file_path["build_features"]
 
     df = loadData(f"{home_dir}/{params['file_path']}")
     clean_data = cleanData(df)
     saveData(clean_data, f"{home_dir}/data/processed/clean_data.csv")
-    # X, y = clean_data["clean_text"], clean_data["category"]
-    # X_train, X_test, y_train, y_test = trainTestSplit(X, y)
 
 
 if __name__ == "__main__":
