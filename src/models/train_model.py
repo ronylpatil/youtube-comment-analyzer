@@ -1,11 +1,8 @@
-# implement model training here Exp-2
-# Exp-1 Baseline model
+# Exp-1 Baseline model - done
 # Exp-2 Bow vs TF-IDF
 # Exp-3 Best from Exp-2 vs Unigram vs Bigram vs Trigram
 # Exp-4 ML Algo's
 # Exp-5 Tune Best Model from Exp-4
-
-# create function jisme hum exp ka naam pass karenge or vo humko sare parameters us experiment k under track karega
 
 import yaml
 import mlflow
@@ -14,12 +11,10 @@ import pathlib
 import joblib
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 from typing import Tuple
 from mlflow.models.signature import infer_signature
 from sklearn.metrics import classification_report, accuracy_score
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.model_selection import train_test_split
 
@@ -46,6 +41,7 @@ def run_experiment(
         df["clean_text"], df["category"], test_size=test_size
     )
 
+    # convert text to vectors
     X_train_vect, X_test_vect = feature_extraction(
         X_train=X_train,
         X_test=X_test,
@@ -54,20 +50,21 @@ def run_experiment(
         max_features=max_features,
     )
 
+    # set mlflow experiment name
     mlflow.set_experiment(experiment_name)
-    
+
     with mlflow.start_run() as run:
         # set tags for the experiment
         mlflow.set_tag(
             "mlflow.runName", f"{vectorizer_type}_{n_gram_name}_{model_name}"
         )
         mlflow.set_tag("experiment_type", f"{experiment_name}")
-        mlflow.set_tag("model_type", "RandomForestClassifier")
+        mlflow.set_tag("model", model_name)
 
         # add a description
         mlflow.set_tag(
             "description",
-            f"RandomForest with {vectorizer_type}, ngram_range={n_gram_name}, max_features={max_features}",
+            f"{model_name} with {vectorizer_type}, ngram_range={n_gram_name}, max_features={max_features}",
         )
 
         # log vectorizer parameters
@@ -76,7 +73,7 @@ def run_experiment(
         mlflow.log_param("vectorizer_max_features", max_features)
 
         # log model hyper-parameters
-        for i, j in model_params.items():
+        for i, j in model_params[model_name].items():
             mlflow.log_param(i, j)
 
         model_signature = infer_signature(X_train_vect, y_train)
@@ -86,16 +83,18 @@ def run_experiment(
             X_train_vect,
             y_train,
             X_test_vect,
-            params=model_params,
-            model_name="Random_Forest",
+            params=model_params[model_name],
+            model_name=model_name,
         )
 
         # log accuracy
         accuracy = accuracy_score(y_test, y_pred)
-        mlflow.log_metric("accuracy", accuracy)
+        mlflow.log_metric("accuracy", round(accuracy, 3))
 
         # log classification report
-        classification_rep = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
+        classification_rep = classification_report(
+            y_test, y_pred, output_dict=True, zero_division=0
+        )
         for label, metrics in classification_rep.items():
             if isinstance(metrics, dict):
                 for metric, value in metrics.items():
@@ -103,20 +102,25 @@ def run_experiment(
 
         # log confusion matrix
         cm_path = conf_matrix(y_test, y_pred, path=path)
-        print(f"cm_path: {cm_path}")
-        # mlflow.log_artifact(cm_path, "confusion_matrix")
+        mlflow.log_artifact(cm_path, "confusion_matrix")
 
         # save model to local
         joblib.dump(model, model_dir)
 
         # log the model
         mlflow.sklearn.log_model(
-            model, f"random_forest_model_{vectorizer_type}_{n_gram_name}", signature = model_signature
+            model,
+            f"{model_name}_{vectorizer_type}_{n_gram_name}",
+            signature=model_signature,
         )
 
 
 def feature_extraction(
-    vectorizer_type: str, max_features: int, ngram_range: Tuple, X_train: pd.DataFrame, X_test: pd.DataFrame
+    vectorizer_type: str,
+    max_features: int,
+    ngram_range: Tuple,
+    X_train: pd.DataFrame,
+    X_test: pd.DataFrame,
 ):
     if vectorizer_type == "bow":
         try:
@@ -152,8 +156,13 @@ def train_model(
     model_name: str,
 ) -> pd.Series:
     # train multiple models
-    if model_name == "Random_Forest":
+    if model_name == "random_forest":
         model = RandomForestClassifier(**params)
+        model.fit(x_train, y_train)
+        y_pred = model.predict(x_test)
+        return y_pred, model
+    elif model_name == "gradient_boost":
+        model = GradientBoostingClassifier(**params)
         model.fit(x_train, y_train)
         y_pred = model.predict(x_test)
         return y_pred, model
@@ -180,22 +189,16 @@ def main() -> None:
         experiment_name=params["train_model"]["experiment_name"],
         vectorizer_type=params["build_features"]["vectorizer_type"],
         n_gram=params["build_features"]["n_gram"],
-        model_params=params["train_model"]["hyperparams"]["Random_Forest"],
+        model_params=params["train_model"]["hyperparams"],
         path=f"{home_dir}/figures",
         test_size=params["train_model"]["test_size"],
         n_gram_name=params["build_features"]["n_gram_name"],
-        model_dir=f"{home_dir}/models/baseline_model.joblib"
+        model_dir=f"{home_dir}/models/baseline_model.joblib",
     )
-
-    features = feature_extraction(
-        "bow", max_features=10000, ngram_range=(1, 2), data=df["clean_text"]
-    )
-    # print(params["train_model"]["experiment_name"])
 
 
 if __name__ == "__main__":
     infologger.info("train_model.py as __main__")
     main()
 
-# confusion matrix function not returning path check it
 # implement script to fetch the registered model from dagshub
