@@ -46,14 +46,9 @@ def run_experiment(
         df["clean_text"], df["category"], test_size=test_size
     )
 
-    X_train_clean = feature_extraction(
-        data=X_train,
-        vectorizer_type=vectorizer_type,
-        ngram_range=n_gram,
-        max_features=max_features,
-    )
-    X_test_clean = feature_extraction(
-        data=X_test,
+    X_train_vect, X_test_vect = feature_extraction(
+        X_train=X_train,
+        X_test=X_test,
         vectorizer_type=vectorizer_type,
         ngram_range=n_gram,
         max_features=max_features,
@@ -84,13 +79,13 @@ def run_experiment(
         for i, j in model_params.items():
             mlflow.log_param(i, j)
 
-        model_signature = infer_signature(X_train_clean, y_train)
+        model_signature = infer_signature(X_train_vect, y_train)
 
         # train the model
         y_pred, model = train_model(
-            X_train_clean,
+            X_train_vect,
             y_train,
-            X_test_clean,
+            X_test_vect,
             params=model_params,
             model_name="Random_Forest",
         )
@@ -121,30 +116,32 @@ def run_experiment(
 
 
 def feature_extraction(
-    vectorizer_type: str, max_features: int, ngram_range: Tuple, data: pd.DataFrame
+    vectorizer_type: str, max_features: int, ngram_range: Tuple, X_train: pd.DataFrame, X_test: pd.DataFrame
 ):
     if vectorizer_type == "bow":
         try:
-            vectorizer = CountVectorizer(
+            cv = CountVectorizer(
                 max_features=max_features, ngram_range=tuple(ngram_range)
             )
-            x = vectorizer.fit_transform(data).toarray()
+            X_train_vect = cv.fit_transform(X_train)
+            X_test_vect = cv.transform(X_test)
             infologger.info(f"features extracted (bow) successfully...")
         except Exception as e:
             infologger.info(f"some issue in bow. Error: {e}")
         else:
-            return x
+            return X_train_vect, X_test_vect
     elif vectorizer_type == "tfidf":
         try:
             tfidf = TfidfVectorizer(
                 max_features=max_features, ngram_range=tuple(ngram_range)
             )
-            x = tfidf.fit_transform(data).toarray()
+            X_train_vect = tfidf.fit_transform(X_train)
+            X_test_vect = tfidf.transform(X_test)
             infologger.info(f"features extracted (tfidf) successfully...")
         except Exception as e:
             infologger.info(f"some issue in tfidf. Error: {e}")
         else:
-            return x
+            return X_train_vect, X_test_vect
 
 
 def train_model(
@@ -199,3 +196,6 @@ def main() -> None:
 if __name__ == "__main__":
     infologger.info("train_model.py as __main__")
     main()
+
+# confusion matrix function not returning path check it
+# implement script to fetch the registered model from dagshub
