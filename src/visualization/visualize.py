@@ -1,6 +1,3 @@
-# create confusion metrix
-
-
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
@@ -12,17 +9,17 @@ def conf_matrix(y_test: pd.Series, y_pred: pd.Series, path: str) -> str:
     try:
         curr_time = datetime.now().strftime("%d%m%y-%H%M%S")
     except Exception as e:
-        infologger.info(
-            f"something wrong with directories [check visualize.conf_matrix()]. exc: {e}"
+        infologger.error(
+            f"something wrong with directories, check conf_matrix() for issue. exception: {e}"
         )
     else:
         infologger.info("directories are all set!")
         try:
-            cm = confusion_matrix(y_test, y_pred, labels=[-1,0,1])
-            disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[-1,0,1])
+            cm = confusion_matrix(y_test, y_pred)
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm)
         except Exception as e:
-            infologger.info(
-                f"unable to plot the confusion metrix [check conf_matrix()]. exc: {e}"
+            infologger.critical(
+                f"unable to plot the confusion metrix, check conf_matrix() for issue. exception: {e}"
             )
         else:
             disp.plot(cmap=plt.cm.Blues)
@@ -32,7 +29,7 @@ def conf_matrix(y_test: pd.Series, y_pred: pd.Series, path: str) -> str:
             filename = f"{path}/{curr_time}.png"
             plt.savefig(filename)
             plt.close()
-            infologger.info(f"confusion metrix saved at [{path}]")
+            infologger.info(f"confusion metrix saved successfully, path: {path}")
             return filename
 
 

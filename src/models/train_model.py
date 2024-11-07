@@ -1,4 +1,4 @@
-# Exp-1 Baseline model - done
+# Exp-1 Baseline Model - done
 # Exp-2 Bow vs TF-IDF
 # Exp-3 Best from Exp-2 vs Unigram vs Bigram vs Trigram
 # Exp-4 ML Algo's
@@ -6,11 +6,13 @@
 
 import yaml
 import mlflow
+import joblib
 import dagshub  # type: ignore
 import pathlib
-import joblib
 import numpy as np
 import pandas as pd
+import xgboost as xgb  # type: ignore
+import lightgbm as lgb  # type: ignore
 from typing import Tuple
 from mlflow.models.signature import infer_signature
 from sklearn.metrics import classification_report, accuracy_score
@@ -21,6 +23,8 @@ from sklearn.model_selection import train_test_split
 from src.logger import infologger
 from src.features.build_features import loadData
 from src.visualization.visualize import conf_matrix
+
+infologger.info("*** Executing: train_model.py ***")
 
 
 def run_experiment(
@@ -36,10 +40,20 @@ def run_experiment(
     n_gram_name: str,
     model_dir: str,
 ) -> None:
+
+    infologger.info("run_experiment started...")
+
     # split the data
     X_train, X_test, y_train, y_test = train_test_split(
         df["clean_text"], df["category"], test_size=test_size
     )
+    infologger.info(f"data splited for training and testing. test_size: {test_size}")
+
+    # convert [-1,0,1] to [0,1,2]
+    target_map = {-1: 0, 0: 1, 1: 2}
+    y_train = y_train.map(target_map).astype(float)
+    y_test = y_test.map(target_map).astype(float)
+    infologger.info(f"target varible mapped successfully. mapping: {target_map}")
 
     # convert text to vectors
     X_train_vect, X_test_vect = feature_extraction(
@@ -49,6 +63,7 @@ def run_experiment(
         ngram_range=n_gram,
         max_features=max_features,
     )
+    infologger.info("input data vectorized successfully")
 
     # set mlflow experiment name
     mlflow.set_experiment(experiment_name)
@@ -73,8 +88,9 @@ def run_experiment(
         mlflow.log_param("vectorizer_max_features", max_features)
 
         # log model hyper-parameters
-        for i, j in model_params[model_name].items():
-            mlflow.log_param(i, j)
+        if model_params[model_name]:
+            for i, j in model_params[model_name].items():
+                mlflow.log_param(i, j)
 
         model_signature = infer_signature(X_train_vect, y_train)
 
@@ -86,6 +102,7 @@ def run_experiment(
             params=model_params[model_name],
             model_name=model_name,
         )
+        infologger.info(f"{model_name} model trained successfully")
 
         # log accuracy
         accuracy = accuracy_score(y_test, y_pred)
@@ -106,6 +123,7 @@ def run_experiment(
 
         # save model to local
         joblib.dump(model, model_dir)
+        infologger.info(f"model saved successfully, path: {model_dir}")
 
         # log the model
         mlflow.sklearn.log_model(
@@ -113,6 +131,7 @@ def run_experiment(
             f"{model_name}_{vectorizer_type}_{n_gram_name}",
             signature=model_signature,
         )
+        infologger.info("model successfully logged under mlflow")
 
 
 def feature_extraction(
@@ -129,9 +148,11 @@ def feature_extraction(
             )
             X_train_vect = cv.fit_transform(X_train)
             X_test_vect = cv.transform(X_test)
-            infologger.info(f"features extracted (bow) successfully...")
+            infologger.info(f"input features vectorized (bow) successfully...")
         except Exception as e:
-            infologger.info(f"some issue in bow. Error: {e}")
+            infologger.error(
+                f"some issue in bow, check feature_extraction() for issue. exception: {e}"
+            )
         else:
             return X_train_vect, X_test_vect
     elif vectorizer_type == "tfidf":
@@ -141,9 +162,11 @@ def feature_extraction(
             )
             X_train_vect = tfidf.fit_transform(X_train)
             X_test_vect = tfidf.transform(X_test)
-            infologger.info(f"features extracted (tfidf) successfully...")
+            infologger.info(f"input features vectorized (tfidf) successfully...")
         except Exception as e:
-            infologger.info(f"some issue in tfidf. Error: {e}")
+            infologger.error(
+                f"some issue in tfidf, check feature_extraction() for issue. exception: {e}"
+            )
         else:
             return X_train_vect, X_test_vect
 
@@ -157,15 +180,55 @@ def train_model(
 ) -> pd.Series:
     # train multiple models
     if model_name == "random_forest":
-        model = RandomForestClassifier(**params)
-        model.fit(x_train, y_train)
-        y_pred = model.predict(x_test)
-        return y_pred, model
+        try:
+            model = RandomForestClassifier(**params)
+            model.fit(x_train, y_train)
+        except Exception as e:
+            infologger.critical(
+                f"unable to train random_forest model, check train_model() for issue. exception: {e}"
+            )
+        else:
+            y_pred = model.predict(x_test)
+            infologger.info("random_forest model trained successfully")
+            return y_pred, model
     elif model_name == "gradient_boost":
-        model = GradientBoostingClassifier(**params)
-        model.fit(x_train, y_train)
-        y_pred = model.predict(x_test)
-        return y_pred, model
+        try:
+            model = GradientBoostingClassifier(**params)
+            model.fit(x_train, y_train)
+        except Exception as e:
+            infologger.critical(
+                f"unable to train gradient_boost model, check train_model() for issue. exception: {e}"
+            )
+        else:
+            y_pred = model.predict(x_test)
+            infologger.info("gradient_boost model trained successfully")
+            return y_pred, model
+    elif model_name == "xgb":
+        try:
+            model = xgb.XGBClassifier(**params, num_class=3)
+            model.fit(x_train, y_train)
+        except Exception as e:
+            infologger.critical(
+                f"unable to train xgboost model, check train_model() for issue. exception: {e}"
+            )
+        else:
+            y_pred = model.predict(x_test)
+            infologger.info("xgboost model trained successfully")
+            return y_pred, model
+    elif model_name == "lgbm":
+        try:
+            model = lgb.LGBMClassifier(num_class=3)
+            x_train = x_train.astype(float)
+            x_test = x_test.astype(float)
+            model.fit(x_train, y_train)
+        except Exception as e:
+            infologger.critical(
+                f"unable to train lightgbm model, check train_model() for issue. exception: {e}"
+            )
+        else:
+            y_pred = model.predict(x_test)
+            infologger.info("lightgbm model trained successfully")
+            return y_pred, model
 
 
 def main() -> None:
