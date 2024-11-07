@@ -6,4 +6,48 @@ load_dataset:
   bucket: plugindataset
   filename: data/Twitter_Data.csv
   raw_data: /data/raw
-  
+
+build_features:
+  file_path: /data/raw/Twitter_Data.csv
+  vectorizer_type: bow         # bow / tfidf                                                              # ____change_this____
+  n_gram: [1,1]         # (1,1)-unigram (1,2)-bigram (1,3)-trigram (2,2)-bigramOnly (3,3)-trigramOnly     # ____change_this____
+  n_gram_name: unigram                                                                                    # ____change_this____
+  max_features: 10000                                                                                     # ____change_this____
+
+train_model:
+  repo_name: youtube-comment-analyzer
+  repo_owner: ronylpatil
+  test_size: 0.25
+  model_name: catboost                              # ____change_this____
+  experiment_name: "Exp 1 - Baseline Model"               # ____change_this____
+  hyperparams:
+    random_forest: 
+      n_estimators: 200
+      criterion: gini             # {“gini”, “entropy”, “log_loss”}
+      max_depth: 7
+      min_samples_split: 500
+      min_samples_leaf: 1000
+      max_leaf_nodes: 70
+      max_features: sqrt           # {“sqrt”, “log2”, None}
+      oob_score: False              # True/False
+    gradient_boost:
+      loss: log_loss             # {‘log_loss’, ‘exponential’}
+      learning_rate: 0.1
+      n_estimators: 100
+      subsample: 1.0
+      criterion: friedman_mse               #{‘friedman_mse’, ‘squared_error’}
+      max_depth: 4
+      n_iter_no_change: 15
+    xgb:
+      eta: 0.3
+      max_depth: 3
+      subsample: 0.6
+    lgbm: 
+      # pass
+    catboost:
+      iterations: 200
+      learning_rate: 0.2
+      depth: 7
+      loss_function: MultiClass
+      eval_metric: TotalF1
+

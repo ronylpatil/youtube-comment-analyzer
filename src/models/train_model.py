@@ -14,6 +14,7 @@ import pandas as pd
 import xgboost as xgb  # type: ignore
 import lightgbm as lgb  # type: ignore
 from typing import Tuple
+from catboost import CatBoostClassifier # type: ignore
 from mlflow.models.signature import infer_signature
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -228,6 +229,20 @@ def train_model(
         else:
             y_pred = model.predict(x_test)
             infologger.info("lightgbm model trained successfully")
+            return y_pred, model
+    elif model_name == "catboost":
+        try:
+            model = CatBoostClassifier(**params)
+            x_train = x_train.astype(float)
+            x_test = x_test.astype(float)
+            model.fit(x_train, y_train)
+        except Exception as e:
+            infologger.critical(
+                f"unable to train catboost model, check train_model() for issue. exception: {e}"
+            )
+        else:
+            y_pred = model.predict(x_test)
+            infologger.info("catboost model trained successfully")
             return y_pred, model
 
 
