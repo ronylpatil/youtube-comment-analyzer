@@ -1,8 +1,7 @@
-# Exp-1 Baseline Model - done
-# Exp-2 Bow vs TF-IDF
-# Exp-3 Best from Exp-2 vs Unigram vs Bigram vs Trigram
-# Exp-4 ML Algo's
-# Exp-5 Tune Best Model from Exp-4
+# Exp-1 Baseline Model (training baseline models for benchmark)
+# Exp-2 BoW vs TF-IDF (bow vs tfidf vectorization comparision)
+# Exp-3 Unigram vs Bigram vs Trigram (unigram vs bigram vs trigram)
+# Exp-4 Model Tunning (fine tunning lightgbm using optuna)
 
 import yaml
 import mlflow
@@ -14,7 +13,8 @@ import pandas as pd
 import xgboost as xgb  # type: ignore
 import lightgbm as lgb  # type: ignore
 from typing import Tuple
-from catboost import CatBoostClassifier # type: ignore
+from datetime import datetime
+from catboost import CatBoostClassifier  # type: ignore
 from mlflow.models.signature import infer_signature
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -35,14 +35,18 @@ def run_experiment(
     path: str,  # path where confusion matrix will be saved
     test_size: float,
     experiment_name: str,
+    experiment_description: str,
     vectorizer_type: str,
     n_gram: Tuple,
     model_name: str,
-    n_gram_name: str,
     model_dir: str,
 ) -> None:
 
     infologger.info("run_experiment started...")
+    
+    if n_gram == [1,1]: n_gram_name = "unigram"
+    elif n_gram == [1,2]: n_gram_name = "bigram"
+    elif n_gram == [1,3]: n_gram_name = "trigram"
 
     # split the data
     X_train, X_test, y_train, y_test = train_test_split(
@@ -68,12 +72,22 @@ def run_experiment(
 
     # set mlflow experiment name
     mlflow.set_experiment(experiment_name)
+    # experiment_description = f"unigram vs bigram vs trigram"
+    experiment_description = experiment_description
+    mlflow.set_experiment_tag("mlflow.note.content", experiment_description)
 
     with mlflow.start_run() as run:
         # set tags for the experiment
         mlflow.set_tag(
-            "mlflow.runName", f"{vectorizer_type}_{n_gram_name}_{model_name}"
+            "mlflow.runName",
+            f"{vectorizer_type}_{n_gram_name}_{model_name}",
         )
+        # set particular experiment description
+        mlflow.set_tag(
+            "mlflow.note.content",
+            f"{model_name} model with {vectorizer_type}, ngram_range={n_gram_name}, max_features={max_features}",
+        )
+
         mlflow.set_tag("experiment_type", f"{experiment_name}")
         mlflow.set_tag("model", model_name)
 
@@ -123,7 +137,7 @@ def run_experiment(
         mlflow.log_artifact(cm_path, "confusion_matrix")
 
         # save model to local
-        joblib.dump(model, model_dir)
+        joblib.dump(model, f"{model_dir}/{model_name}_{vectorizer_type}_{n_gram_name}.joblib")
         infologger.info(f"model saved successfully, path: {model_dir}")
 
         # log the model
@@ -260,23 +274,36 @@ def main() -> None:
 
     df = loadData(f"{home_dir}/data/processed/clean_data.csv").dropna()
 
-    run_experiment(
-        df=df,
-        max_features=params["build_features"]["max_features"],
-        model_name=params["train_model"]["model_name"],
-        experiment_name=params["train_model"]["experiment_name"],
-        vectorizer_type=params["build_features"]["vectorizer_type"],
-        n_gram=params["build_features"]["n_gram"],
-        model_params=params["train_model"]["hyperparams"],
-        path=f"{home_dir}/figures",
-        test_size=params["train_model"]["test_size"],
-        n_gram_name=params["build_features"]["n_gram_name"],
-        model_dir=f"{home_dir}/models/baseline_model.joblib",
-    )
+    curr_time = datetime.now().strftime("%d%m%y-%H%M%S")
+    pathlib.Path.mkdir(pathlib.Path(f"{home_dir}/models/Exp-3/{curr_time}"), parents=True, exist_ok=True)   # __make_change_here__
+    model_dir = f"{home_dir}/models/Exp-3/{curr_time}"              # __make_change_here__
+
+    for model_name in params["train_model"]["model_name"]:
+        for vectorizer_type in params["build_features"]["vectorizer_type"]:
+            for n_gram in params["build_features"]["n_gram"]:
+                run_experiment(
+                    df=df,
+                    max_features=params["build_features"]["max_features"],
+                    model_name=model_name,
+                    experiment_name=params["train_model"]["experiment_name"],
+                    experiment_description=params["train_model"]["experiment_description"],
+                    vectorizer_type=vectorizer_type,
+                    n_gram=n_gram,
+                    model_params=params["train_model"]["hyperparams"],
+                    path=f"{home_dir}/figures",
+                    test_size=params["train_model"]["test_size"],
+                    model_dir=f"{model_dir}",
+                )
 
 
 if __name__ == "__main__":
     infologger.info("train_model.py as __main__")
     main()
 
+
 # implement script to fetch the registered model from dagshub
+# some problem in exp 3, only few models saved in local - fix this issue (create directory and put model in it) - done
+# fine tune lgbm
+# create tune_model.py
+# cover lightgbm and catboost campusx
+# use optuna

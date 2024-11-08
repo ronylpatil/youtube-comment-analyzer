@@ -25,7 +25,7 @@ def conf_matrix(y_test: pd.Series, y_pred: pd.Series, path: str) -> str:
             disp.plot(cmap=plt.cm.Blues)
             plt.title("Confusion Matrix")
             plt.xlabel("Predicted Label")
-            plt.ylabel("True Label")
+            plt.ylabel("Actual Label")
             filename = f"{path}/{curr_time}.png"
             plt.savefig(filename)
             plt.close()

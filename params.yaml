@@ -9,17 +9,22 @@ load_dataset:
 
 build_features:
   file_path: /data/raw/Twitter_Data.csv
-  vectorizer_type: bow         # bow / tfidf                                                              # ____change_this____
-  n_gram: [1,1]         # (1,1)-unigram (1,2)-bigram (1,3)-trigram (2,2)-bigramOnly (3,3)-trigramOnly     # ____change_this____
-  n_gram_name: unigram                                                                                    # ____change_this____
-  max_features: 10000                                                                                     # ____change_this____
+  vectorizer_type: [bow, tfidf]         # bow / tfidf                      # ____change_this____
+  n_gram: [[1,1], [1,2], [1,3]]         # (1,1)-unigram (1,2)-bigram (1,3)-trigram (2,2)-bigramOnly (3,3)-trigramOnly     # ____change_this____
+  max_features: 10000                                               # ____change_this____
+
+# Exp 1 - Baseline Model (training baseline models for benchmark)
+# Exp 2 - BoW vs TF-IDF (bow vs tfidf vectorization comparision)
+# Exp 3 - Unigram vs Bigram vs Trigram (unigram vs bigram vs trigram)
+# Exp 4 - Model Tunning (fine tunning lightgbm using optuna)
 
 train_model:
   repo_name: youtube-comment-analyzer
   repo_owner: ronylpatil
   test_size: 0.25
-  model_name: catboost                              # ____change_this____
-  experiment_name: "Exp 1 - Baseline Model"               # ____change_this____
+  model_name: [random_forest, gradient_boost, xgb, lgbm, catboost]         # ____change_this____
+  experiment_name: "Exp 3 - Unigram vs Bigram vs Trigram"               # ____change_this____
+  experiment_description: "unigram vs bigram vs trigram"        # ____change_this____
   hyperparams:
     random_forest: 
       n_estimators: 200
