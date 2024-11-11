@@ -26,7 +26,7 @@ def objective_lgbm(trial, x_train, y_train) -> float:
     data_sample_strategy = trial.suggest_categorical(
         "data_sample_strategy", ["bagging", "goss"]
     )
-    n_estimators = trial.suggest_int("n_estimators", 100, 500, step=10)
+    n_estimators = trial.suggest_int("n_estimators", 100, 500)
     learning_rate = trial.suggest_float("learning_rate", 0.1, 0.4, step=0.1)
     max_depth = trial.suggest_int("max_depth", 3, 10)
     top_rate = trial.suggest_float("top_rate", 0.2, 0.4, step=0.1)
@@ -87,100 +87,99 @@ def main() -> None:
     X_train_vect, X_test_vect = feature_extraction(
         X_train=X_train,
         X_test=X_test,
-        vectorizer_type="bow",
+        vectorizer_type="tfidf",
         ngram_range=(1, 2),
-        max_features=10000,
+        max_features=5000,
+        vectorizer_path=f"{home_dir}/vectorizer"
     )
-    X_train_vect = X_train_vect.astype(float)
-    X_test_vect = X_test_vect.astype(float)
-    infologger.info("input data vectorized successfully")
+    # X_train_vect = X_train_vect.astype(float)
+    # X_test_vect = X_test_vect.astype(float)
+    # infologger.info("input data vectorized successfully")
 
-    # print accuracy and classification report
+    # # print accuracy and classification report
 
-    # Create a study object and optimize the objective function
-    study = optuna.create_study(
-        direction="maximize", sampler=optuna.samplers.TPESampler()
-    )  # We aim to maximize accuracy
-    study.optimize(
-        partial(objective_lgbm, x_train=X_train_vect, y_train=y_train), n_trials=params["tune_model"]["n_trials"]
-    )
+    # # Create a study object and optimize the objective function
+    # study = optuna.create_study(
+    #     direction="maximize", sampler=optuna.samplers.TPESampler()
+    # )  # We aim to maximize accuracy
+    # study.optimize(
+    #     partial(objective_lgbm, x_train=X_train_vect, y_train=y_train), n_trials=params["tune_model"]["n_trials"]
+    # )
 
-  
+    # # training model with optimized hyperparameters
+    # best_model = lgbm.LGBMClassifier(
+    #     **study.best_trial.params, objective="multiclass", num_class=3
+    # )
+    # best_model.fit(X_train_vect, y_train)
+    # y_pred = best_model.predict(X_test_vect)
 
-    # training model with optimized hyperparameters
-    best_model = lgbm.LGBMClassifier(
-        **study.best_trial.params, objective="multiclass", num_class=3
-    )
-    best_model.fit(X_train_vect, y_train)
-    y_pred = best_model.predict(X_test_vect)
+    # curr_time = datetime.now().strftime("%d%m%y-%H%M%S")
+    # pathlib.Path.mkdir(
+    #     pathlib.Path(f"{home_dir}/models/fine_tunned/{curr_time}"),
+    #     parents=True,
+    #     exist_ok=True,
+    # )
+    # joblib.dump(
+    #     best_model,
+    #     filename=f"{home_dir}/models/fine_tunned/{curr_time}/tunned_model.joblib",
+    # )
 
-    curr_time = datetime.now().strftime("%d%m%y-%H%M%S")
-    pathlib.Path.mkdir(
-        pathlib.Path(f"{home_dir}/models/fine_tunned/{curr_time}"),
-        parents=True,
-        exist_ok=True,
-    )
-    joblib.dump(
-        best_model,
-        filename=f"{home_dir}/models/fine_tunned/{curr_time}/tunned_model.joblib",
-    )
+    # # set mlflow experiment name
+    # mlflow.set_experiment(params["tune_model"]["experiment_name"])
+    # experiment_description = params["tune_model"]["experiment_description"]
+    # mlflow.set_experiment_tag("mlflow.note.content", experiment_description)
 
-    # set mlflow experiment name
-    mlflow.set_experiment(params["tune_model"]["experiment_name"])
-    experiment_description = params["tune_model"]["experiment_description"]
-    mlflow.set_experiment_tag("mlflow.note.content", experiment_description)
+    # with mlflow.start_run() as run:
+    #     # set tags for the experiment
+    #     mlflow.set_tag(
+    #         "mlflow.runName",
+    #         "tunned_model_lightgbm",
+    #     )
+    #     # set particular experiment description
+    #     mlflow.set_tag(
+    #         "mlflow.note.content",
+    #         f"lightgbm model with bow, ngram_range=bigram, max_features=5000, n_trials={params['tune_model']['n_trials']}",
+    #     )
 
-    with mlflow.start_run() as run:
-        # set tags for the experiment
-        mlflow.set_tag(
-            "mlflow.runName",
-            "tunned_model_lightgbm",
-        )
-        # set particular experiment description
-        mlflow.set_tag(
-            "mlflow.note.content",
-            f"lightgbm model with bow, ngram_range=bigram, max_features=10000, n_trials={params['tune_model']['n_trials']}",
-        )
+    #     # experiment tag
+    #     mlflow.set_tag("experiment_type", params["tune_model"]["experiment_name"])
+    #     mlflow.set_tag("model", "lightgbm")
+    #     mlflow.set_tag("optimizer", "optuna")
+    #     mlflow.set_tag("n_trials", params["tune_model"]["n_trials"])
 
-        # experiment tag
-        mlflow.set_tag("experiment_type", params["tune_model"]["experiment_name"])
-        mlflow.set_tag("model", "lightgbm")
-        mlflow.set_tag("optimizer", "optuna")
-        mlflow.set_tag("n_trials", params["tune_model"]["n_trials"])
-
-        # log vectorizer parameters
-        mlflow.log_param("vectorizer_type", "bow")
-        mlflow.log_param("ngram_range", "bigram")
-        mlflow.log_param("vectorizer_max_features", 10000)
-        mlflow.log_params(study.best_trial.params)
+    #     # log vectorizer parameters
+    #     mlflow.log_param("vectorizer_type", "bow")
+    #     mlflow.log_param("ngram_range", "bigram")
+    #     mlflow.log_param("vectorizer_max_features", 5000)
+    #     mlflow.log_params(study.best_trial.params)
 
 
-        model_signature = infer_signature(X_train_vect, y_train)
+    #     model_signature = infer_signature(X_train_vect, y_train)
 
-        # log accuracy
-        accuracy = accuracy_score(y_test, y_pred)
-        mlflow.log_metric("accuracy", round(accuracy, 3))
+    #     # log accuracy
+    #     accuracy = accuracy_score(y_test, y_pred)
+    #     mlflow.log_metric("accuracy", round(accuracy, 3))
 
-        # log classification report
-        classification_rep = classification_report(
-            y_test, y_pred, output_dict=True, zero_division=0
-        )
-        for label, metrics in classification_rep.items():
-            if isinstance(metrics, dict):
-                for metric, value in metrics.items():
-                    mlflow.log_metric(f"{label}_{metric}", value)
+    #     # log classification report
+    #     classification_rep = classification_report(
+    #         y_test, y_pred, output_dict=True, zero_division=0
+    #     )
+    #     for label, metrics in classification_rep.items():
+    #         if isinstance(metrics, dict):
+    #             for metric, value in metrics.items():
+    #                 mlflow.log_metric(f"{label}_{metric}", value)
 
-        # log confusion matrix
-        cm_path = conf_matrix(y_test, y_pred, path=f"{home_dir}/figures")
-        mlflow.log_artifact(cm_path, "confusion_matrix")
+    #     # log confusion matrix
+    #     cm_path = conf_matrix(y_test, y_pred, path=f"{home_dir}/figures")
+    #     mlflow.log_artifact(cm_path, "confusion_matrix")
 
-        # log the model
-        mlflow.sklearn.log_model(
-            best_model,
-            f"best_model_optuna",
-            signature=model_signature,
-        )
-        infologger.info("model successfully logged under mlflow")
+    #     # log the model
+    #     mlflow.sklearn.log_model(
+    #         best_model,
+    #         f"best_model_optuna",
+    #         signature=model_signature,
+    #     )
+    #     infologger.info("model successfully logged under mlflow")
 
 
 if __name__ == "__main__":

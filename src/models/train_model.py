@@ -40,6 +40,7 @@ def run_experiment(
     n_gram: Tuple,
     model_name: str,
     model_dir: str,
+    vectorizer_path: str
 ) -> None:
 
     infologger.info("run_experiment started...")
@@ -67,6 +68,7 @@ def run_experiment(
         vectorizer_type=vectorizer_type,
         ngram_range=n_gram,
         max_features=max_features,
+        vectorizer_path=vectorizer_path,
     )
     infologger.info("input data vectorized successfully")
 
@@ -77,10 +79,17 @@ def run_experiment(
     mlflow.set_experiment_tag("mlflow.note.content", experiment_description)
 
     with mlflow.start_run() as run:
+        
+        if max_features == 1000 : max_f = '1k'
+        elif max_features == 2000 : max_f = '2k'
+        elif max_features == 3000 : max_f = '3k'
+        elif max_features == 5000 : max_f = '5k'
+        elif max_features == 8000 : max_f = '8k'
+        
         # set tags for the experiment
         mlflow.set_tag(
             "mlflow.runName",
-            f"{vectorizer_type}_{n_gram_name}_{model_name}",
+            f"{vectorizer_type}_{n_gram_name}_{model_name}_{max_f}",
         )
         # set particular experiment description
         mlflow.set_tag(
@@ -137,13 +146,13 @@ def run_experiment(
         mlflow.log_artifact(cm_path, "confusion_matrix")
 
         # save model to local
-        joblib.dump(model, f"{model_dir}/{model_name}_{vectorizer_type}_{n_gram_name}.joblib")
+        joblib.dump(model, f"{model_dir}/{model_name}_{vectorizer_type}_{n_gram_name}_{max_f}.joblib")
         infologger.info(f"model saved successfully, path: {model_dir}")
 
         # log the model
         mlflow.sklearn.log_model(
             model,
-            f"{model_name}_{vectorizer_type}_{n_gram_name}",
+            f"{model_name}_{vectorizer_type}_{n_gram_name}_{max_f}",
             signature=model_signature,
         )
         infologger.info("model successfully logged under mlflow")
@@ -155,7 +164,13 @@ def feature_extraction(
     ngram_range: Tuple,
     X_train: pd.DataFrame,
     X_test: pd.DataFrame,
+    vectorizer_path:str,
 ):
+    
+    if ngram_range == (1,1): n_gram_name = "unigram"
+    elif ngram_range == (1,2): n_gram_name = "bigram"
+    elif ngram_range == (1,3): n_gram_name = "trigram"
+    
     if vectorizer_type == "bow":
         try:
             cv = CountVectorizer(
@@ -169,6 +184,8 @@ def feature_extraction(
                 f"some issue in bow, check feature_extraction() for issue. exception: {e}"
             )
         else:
+            joblib.dump(cv, f"{vectorizer_path}/bow/bow_{n_gram_name}_{max_features}.joblib")
+            infologger.info(f"bow_vectorizer saved successfully, path: {vectorizer_path}/bow/bow_{n_gram_name}_{max_features}.joblib")
             return X_train_vect, X_test_vect
     elif vectorizer_type == "tfidf":
         try:
@@ -183,6 +200,8 @@ def feature_extraction(
                 f"some issue in tfidf, check feature_extraction() for issue. exception: {e}"
             )
         else:
+            joblib.dump(tfidf, f"{vectorizer_path}/tfidf/tfidf_{n_gram_name}_{max_features}.joblib")
+            infologger.info(f"tfidf_vectorizer saved successfully, path: {vectorizer_path}/tfidf/tfidf_{n_gram_name}_{max_features}.joblib")
             return X_train_vect, X_test_vect
 
 
@@ -281,19 +300,21 @@ def main() -> None:
     for model_name in params["train_model"]["model_name"]:
         for vectorizer_type in params["build_features"]["vectorizer_type"]:
             for n_gram in params["build_features"]["n_gram"]:
-                run_experiment(
-                    df=df,
-                    max_features=params["build_features"]["max_features"],
-                    model_name=model_name,
-                    experiment_name=params["train_model"]["experiment_name"],
-                    experiment_description=params["train_model"]["experiment_description"],
-                    vectorizer_type=vectorizer_type,
-                    n_gram=n_gram,
-                    model_params=params["train_model"]["hyperparams"],
-                    path=f"{home_dir}/figures",
-                    test_size=params["train_model"]["test_size"],
-                    model_dir=f"{model_dir}",
-                )
+                for max_features in params["build_features"]["max_features"]:
+                    run_experiment(
+                        df=df,
+                        max_features=max_features,
+                        model_name=model_name,
+                        experiment_name=params["train_model"]["experiment_name"],
+                        experiment_description=params["train_model"]["experiment_description"],
+                        vectorizer_type=vectorizer_type,
+                        n_gram=n_gram,
+                        model_params=params["train_model"]["hyperparams"],
+                        path=f"{home_dir}/figures",
+                        test_size=params["train_model"]["test_size"],
+                        model_dir=f"{model_dir}",
+                        vectorizer_path=f"{home_dir}/vectorizer"
+                    )
 
 
 if __name__ == "__main__":
