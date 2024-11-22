@@ -1,0 +1,80 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor",
+  "elements": [
+    {
+      "type": "rectangle",
+      "version": 380,
+      "versionNonce": 1404374464,
+      "isDeleted": false,
+      "id": "4B6B_YK_AaNspA5nULWMf",
+      "fillStyle": "solid",
+      "strokeWidth": 4,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "angle": 0,
+      "x": 230.46306268713647,
+      "y": 137.79998779296875,
+      "strokeColor": "#ffffff",
+      "backgroundColor": "#1e1e1e",
+      "width": 364.4739600749457,
+      "height": 490,
+      "seed": 2053209536,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [
+        {
+          "type": "text",
+          "id": "c6TxOKU9qXq2cee2ZppEs"
+        }
+      ],
+      "updated": 1732290132730,
+      "link": null,
+      "locked": false
+    },
+    {
+      "type": "text",
+      "version": 413,
+      "versionNonce": 917384640,
+      "isDeleted": false,
+      "id": "c6TxOKU9qXq2cee2ZppEs",
+      "fillStyle": "solid",
+      "strokeWidth": 4,
+      "strokeStyle": "solid",
+      "roughness": 0,
+      "opacity": 100,
+      "angle": 0,
+      "x": 235.46306268713647,
+      "y": 142.79998779296875,
+      "strokeColor": "#ffffff",
+      "backgroundColor": "#1e1e1e",
+      "width": 348.15972900390625,
+      "height": 480,
+      "seed": 887866816,
+      "groupIds": [],
+      "frameId": null,
+      "roundness": null,
+      "boundElements": [],
+      "updated": 1732290129481,
+      "link": null,
+      "locked": false,
+      "fontSize": 16,
+      "fontFamily": 1,
+      "text": "Spelling Correction tool:\n- symspellpy\n\nRedis deployement (FastAPI cache mech):\n- upstash\n\nFree services:\n- https://freestuff.dev/\n\nLLM API Service:\n- groq cloud\n\nIMP Source:\n- https://github.com/cheahjs/free-llm-api-\nresources?tab=readme-ov-file\n\nFastAPI - JS Communication:\n- \nhttps://github.com/fastapi/fastapi/discussio\nns/10108\n\n\n\n",
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": "4B6B_YK_AaNspA5nULWMf",
+      "originalText": "Spelling Correction tool:\n- symspellpy\n\nRedis deployement (FastAPI cache mech):\n- upstash\n\nFree services:\n- https://freestuff.dev/\n\nLLM API Service:\n- groq cloud\n\nIMP Source:\n- https://github.com/cheahjs/free-llm-api-resources?tab=readme-ov-file\n\nFastAPI - JS Communication:\n- https://github.com/fastapi/fastapi/discussions/10108\n\n\n\n",
+      "lineHeight": 1.25,
+      "baseline": 474
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}
