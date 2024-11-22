@@ -49,7 +49,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # connecting with redis db
 rd = redis.Redis(
     host="clever-mayfly-27272.upstash.io", port=6379, password=key, ssl=True
@@ -60,13 +59,16 @@ rd = redis.Redis(
 class PredictionRequest(BaseModel):
     data: str
 
+
 # define a Pydantic model for the prediction response
 class PredictionResponse(BaseModel):
     comment: str
     sentiment: float
 
+
 def get_cache_key(data: str) -> str:
-    return hashlib.sha256(data.encode()).hexdigest()
+    return hashlib.md5(data.encode()).hexdigest()
+
 
 async def predict(data: str):
     # use ml model for prediction
@@ -89,11 +91,10 @@ async def predict(data: str):
 
 # function to get cached prediction from redis
 # define the prediction endpoint
-@app.post("/sentiment", response_model=PredictionResponse)
-async def prediction_endpoint(request: PredictionRequest):
-    logger.info(request)
+@app.post("/predict", response_model=PredictionResponse)
+async def prediction_endpoint(request: PredictionRequest) -> JSONResponse:
     cache_key = get_cache_key(request.data)
-    try: 
+    try:
         cache = rd.get(cache_key)
     except Exception as e:
         logger.error(f"Error accessing Redis: {e}")
@@ -107,7 +108,7 @@ async def prediction_endpoint(request: PredictionRequest):
         logger.info(f"cache miss!, computing prediction...")
         prediction = await predict(request.data)
         r = {"comment": request.data, "sentiment": prediction}
-        rd.set(cache_key, json.dumps(r))
+        rd.set(cache_key, json.dumps(r), ex=1000)
         return JSONResponse(r)
 
 
@@ -118,4 +119,4 @@ def read_root():
 
 # [it will look for changes in whole project directory, to limit this score use --reload-dir ./dir_name]
 # server cmd: uvicorn api.rest_api:app --reload --reload-dir ./api --host 127.0.0.1 --port 8000
-# install "httpie" to access API through "http :8000" cmd.
+# install "httpie" to access API through "http :8000/predict data="useless content, not did revision well think so"" cmd.
