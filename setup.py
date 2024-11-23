@@ -8,3 +8,4 @@ setup(
     author='ronilpatil',
     license='MIT',
 )
+# pip install -e . --use-pep517 (create pyproject.toml and hit this command to install local package in editable mode)

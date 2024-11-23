@@ -87,3 +87,6 @@ target/
 
 # secrets.yaml store aws and other credentials
 secrets.yaml 
+
+# exclude catboost model metadata directory
+catboost_info
