@@ -66,7 +66,7 @@ def run_experiment(
     infologger.info(f"target varible mapped successfully. mapping: {target_map}")
 
     # convert text to vectors
-    X_train_vect, X_test_vect = feature_extraction(
+    X_train_vect, X_test_vect, vect_obj_path = feature_extraction(
         X_train=X_train,
         X_test=X_test,
         vectorizer_type=vectorizer_type,
@@ -155,6 +155,9 @@ def run_experiment(
         # log confusion matrix
         cm_path = conf_matrix(y_test, y_pred, path=path)
         mlflow.log_artifact(cm_path, "confusion_matrix")
+        
+        # log vectorizer object
+        mlflow.log_artifact(vect_obj_path, artifact_path="vectorizer")
 
         # save model to local
         joblib.dump(
@@ -207,7 +210,7 @@ def feature_extraction(
             infologger.info(
                 f"bow_vectorizer saved successfully, path: {vectorizer_path}/bow/bow_{n_gram_name}_{max_features}.joblib"
             )
-            return X_train_vect, X_test_vect
+            return X_train_vect, X_test_vect, f"{vectorizer_path}/bow/bow_{n_gram_name}_{max_features}.joblib"
     elif vectorizer_type == "tfidf":
         try:
             tfidf = TfidfVectorizer(
@@ -228,7 +231,7 @@ def feature_extraction(
             infologger.info(
                 f"tfidf_vectorizer saved successfully, path: {vectorizer_path}/tfidf/tfidf_{n_gram_name}_{max_features}.joblib"
             )
-            return X_train_vect, X_test_vect
+            return X_train_vect, X_test_vect, f"{vectorizer_path}/tfidf/tfidf_{n_gram_name}_{max_features}.joblib"
 
 
 def train_model(

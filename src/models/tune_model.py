@@ -97,11 +97,11 @@ def main() -> None:
         n_gram_name = "trigram"
 
     # convert text to vectors
-    X_train_vect, X_test_vect = feature_extraction(
+    X_train_vect, X_test_vect, vect_obj_path = feature_extraction(
         X_train=X_train,
         X_test=X_test,
         vectorizer_type=params["tune_model"]["vectorizer_type"],
-        ngram_range=tuple(params["tune_model"]["ngram_range"]),
+        ngram_range=params["tune_model"]["ngram_range"],
         max_features=params["tune_model"]["max_features"],
         vectorizer_path=f"{home_dir}/vectorizer",
     )
@@ -190,6 +190,9 @@ def main() -> None:
         # log confusion matrix
         cm_path = conf_matrix(y_test, y_pred, path=f"{home_dir}/figures")
         mlflow.log_artifact(cm_path, "confusion_matrix")
+
+        # log vectorizer object
+        mlflow.log_artifact(vect_obj_path, artifact_path="vectorizer")
 
         # log the model
         mlflow.sklearn.log_model(
