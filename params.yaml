@@ -4,8 +4,9 @@ base:
 
 load_dataset:
   bucket: plugindataset
-  filename: data/Twitter_Data.csv
+  aws_file_name: data/Twitter_Data.csv
   raw_data: /data/raw
+  file_name: Twitter_Data.csv
 
 build_features:
   file_path: /data/raw/Twitter_Data.csv
@@ -23,6 +24,7 @@ train_model:
   repo_owner: ronylpatil
   test_size: 0.25
   model_name: [lgbm]         # ____change_this____
+  experiment: "Exp-3"
   experiment_name: "Exp 3 - Unigram vs Bigram vs Trigram"               # ____change_this____
   experiment_description: "unigram vs bigram vs trigram"        # ____change_this____
   hyperparams:
