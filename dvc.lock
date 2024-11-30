@@ -1,0 +1,154 @@
+schema: '2.0'
+stages:
+  load_dataset:
+    cmd: python src/data/load_dataset.py
+    deps:
+    - path: ./src/data/load_dataset.py
+      hash: md5
+      md5: 2d5aab00bab121f1bf8a678bad44b7cd
+      size: 2894
+    params:
+      params.yaml:
+        load_dataset.aws_file_name: data/Twitter_Data.csv
+        load_dataset.bucket: plugindataset
+        load_dataset.file_name: Twitter_Data.csv
+        load_dataset.raw_data: /data/raw
+    outs:
+    - path: ./data/raw/Twitter_Data.csv
+      hash: md5
+      md5: 05975308816e31a4c0b828b5dbd0e1ca
+      size: 13813628
+  build_features:
+    cmd: python src/features/build_features.py
+    deps:
+    - path: ./data/raw/Twitter_Data.csv
+      hash: md5
+      md5: 05975308816e31a4c0b828b5dbd0e1ca
+      size: 13813628
+    - path: ./src/features/build_features.py
+      hash: md5
+      md5: 9a4057951d1fe9524ec11912f0bb1811
+      size: 3764
+    params:
+      params.yaml:
+        build_features.file_path: /data/raw/Twitter_Data.csv
+        build_features.max_features:
+        - 10000
+        build_features.n_gram:
+        - - 1
+          - 2
+        build_features.vectorizer_type:
+        - bow
+    outs:
+    - path: ./data/processed/clean_data.csv
+      hash: md5
+      md5: 56e7712295d39893d38ce92a7e6d5e7d
+      size: 10716259
+  train_model:
+    cmd: python src/models/train_model.py
+    deps:
+    - path: ./data/processed/clean_data.csv
+      hash: md5
+      md5: 56e7712295d39893d38ce92a7e6d5e7d
+      size: 10716259
+    - path: ./src/models/train_model.py
+      hash: md5
+      md5: 6ea49c48df16f052efeff28b795ceaba
+      size: 13965
+    params:
+      params.yaml:
+        build_features.max_features:
+        - 10000
+        build_features.n_gram:
+        - - 1
+          - 2
+        build_features.vectorizer_type:
+        - bow
+        train_model.experiment: Exp-3
+        train_model.experiment_description: unigram vs bigram vs trigram
+        train_model.experiment_name: Exp 3 - Unigram vs Bigram vs Trigram
+        train_model.hyperparams:
+          random_forest:
+            n_estimators: 200
+            criterion: gini
+            max_depth: 7
+            min_samples_split: 500
+            min_samples_leaf: 1000
+            max_leaf_nodes: 70
+            max_features: sqrt
+            oob_score: false
+          gradient_boost:
+            loss: log_loss
+            learning_rate: 0.1
+            n_estimators: 100
+            subsample: 1.0
+            criterion: friedman_mse
+            max_depth: 4
+            n_iter_no_change: 15
+          xgb:
+            eta: 0.3
+            max_depth: 3
+            subsample: 0.6
+          lgbm:
+          catboost:
+            iterations: 200
+            learning_rate: 0.2
+            depth: 7
+            loss_function: MultiClass
+            eval_metric: TotalF1
+        train_model.model_name:
+        - lgbm
+        train_model.repo_name: youtube-comment-analyzer
+        train_model.repo_owner: ronylpatil
+        train_model.test_size: 0.25
+    outs:
+    - path: ./figures/training/
+      hash: md5
+      md5: a6815a5ffebd6c3b768b92c07f56e57d.dir
+      size: 22548
+      nfiles: 1
+    - path: ./models/Exp-3/
+      hash: md5
+      md5: 26858ef3849634d21b2289ee1603085c.dir
+      size: 1284908
+      nfiles: 1
+    - path: ./vectorizer/
+      hash: md5
+      md5: 883f5b18927d301a1b9baaf8ca45e8b1.dir
+      size: 266867
+      nfiles: 3
+  tune_model:
+    cmd: python src/models/tune_model.py
+    deps:
+    - path: ./data/processed/clean_data.csv
+      hash: md5
+      md5: 56e7712295d39893d38ce92a7e6d5e7d
+      size: 10716259
+    - path: ./src/models/tune_model.py
+      hash: md5
+      md5: c2763957aabc2f9f8eff582bb4b0e52f
+      size: 8101
+    params:
+      params.yaml:
+        train_model.repo_name: youtube-comment-analyzer
+        train_model.repo_owner: ronylpatil
+        train_model.test_size: 0.25
+        tune_model.experiment_description: fine tunning lightgbm model using optuna
+        tune_model.experiment_name: Exp 4 - Fine Tunning
+        tune_model.max_features: 10000
+        tune_model.n_trials: 1
+        tune_model.ngram_range:
+        - 1
+        - 2
+        tune_model.vectorizer_type: bow
+    outs:
+    - path: ./figures/tunning/
+      hash: md5
+      md5: 46aa12824f15e600572d85f4838a21a6.dir
+      size: 22818
+      nfiles: 1
+    - path: ./models/fine_tunned/
+      hash: md5
+      md5: e9c3e3073ac43cc5da977ff63ad0444e.dir
+      size: 3952636
+      nfiles: 1

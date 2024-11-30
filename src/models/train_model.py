@@ -325,10 +325,18 @@ def main() -> None:
     curr_time = datetime.now().strftime("%d%m%y-%H%M%S")
     pathlib.Path.mkdir(
         pathlib.Path(f"{home_dir}/models/Exp-3/{curr_time}"),
+        # pathlib.Path(f"{home_dir}/models/Exp-3/"),
         parents=True,
         exist_ok=True,
     )  # __make_change_here__
     model_dir = f"{home_dir}/models/Exp-3/{curr_time}"  # __make_change_here__
+    # model_dir = f"{home_dir}/models/Exp-3/"  # __make_change_here__
+    pathlib.Path.mkdir(
+        pathlib.Path(f"{home_dir}/figures/training"),
+        parents=True,
+        exist_ok=True,
+    )
+
 
     for model_name in params["train_model"]["model_name"]:
         for vectorizer_type in params["build_features"]["vectorizer_type"]:
@@ -345,7 +353,7 @@ def main() -> None:
                         vectorizer_type=vectorizer_type,
                         n_gram=n_gram,
                         model_params=params["train_model"]["hyperparams"],
-                        path=f"{home_dir}/figures",
+                        path=f"{home_dir}/figures/training",
                         test_size=params["train_model"]["test_size"],
                         model_dir=f"{model_dir}",
                         vectorizer_path=f"{home_dir}/vectorizer",

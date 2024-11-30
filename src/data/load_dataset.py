@@ -45,7 +45,7 @@ def main() -> None :
      secret_file = home_dir.as_posix() + '/secrets.yaml'
      
      try : 
-          params = yaml.safe_load(open(params_file))
+          params = yaml.safe_load(open(params_file, encoding="utf-8"))
           sc_params = yaml.safe_load(open(secret_file))
      except Exception as e : 
           infologger.error(f'unable to load the params file, check main() for potential issue. exception: {e}')
@@ -53,9 +53,9 @@ def main() -> None :
           # create dir if not present, else execute without any warning/error
           output_path = home_dir.as_posix() + params['load_dataset']['raw_data']
           pathlib.Path(output_path).mkdir(parents = True, exist_ok = True)
-          data = extract_data(bucket = params['load_dataset']['bucket'], key = params['load_dataset']['filename'],
+          data = extract_data(bucket = params['load_dataset']['bucket'], key = params['load_dataset']['aws_file_name'],
                               access_key = sc_params['aws_access_key_id'], secret_key = sc_params['aws_secret_access_key'])
-          save_data(data, output_path = output_path, file_name = params['load_dataset']['filename'])
+          save_data(data, output_path = output_path, file_name = params['load_dataset']['aws_file_name'])
 
 if __name__ == "__main__" : 
      infologger.info('load_dataset.py as __main__')

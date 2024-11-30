@@ -90,3 +90,4 @@ secrets.yaml
 
 # exclude catboost model metadata directory
 catboost_info
+/vectorizer

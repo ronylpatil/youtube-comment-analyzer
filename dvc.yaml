@@ -1,0 +1,70 @@
+# implement dvc pipeline
+
+stages:
+  load_dataset:
+    cmd: python src/data/load_dataset.py
+    deps:
+    - ./src/data/load_dataset.py
+    params:
+    - load_dataset.bucket
+    - load_dataset.raw_data
+    - load_dataset.file_name
+    - load_dataset.aws_file_name
+    outs:
+    - .${load_dataset.raw_data}/${load_dataset.file_name}
+  
+  build_features:
+    cmd: python src/features/build_features.py
+    deps:
+    - ./src/features/build_features.py
+    - .${load_dataset.raw_data}/${load_dataset.file_name}
+    params:
+    - build_features.file_path
+    - build_features.vectorizer_type
+    - build_features.n_gram
+    - build_features.max_features
+    outs:
+    - ./data/processed/clean_data.csv
+  
+  train_model:
+    cmd: python src/models/train_model.py
+    deps:
+    - ./src/models/train_model.py
+    - ./data/processed/clean_data.csv
+    params:
+    - build_features.vectorizer_type
+    - build_features.n_gram
+    - build_features.max_features
+    - train_model.repo_owner
+    - train_model.repo_name
+    - train_model.model_name
+    - train_model.experiment
+    - train_model.experiment_name
+    - train_model.experiment_description
+    - train_model.hyperparams
+    - train_model.test_size
+    outs:
+    - ./models/${train_model.experiment}/
+    - ./figures/training/
+    - ./vectorizer/:
+       persist: true
+
+  tune_model:
+    cmd: python src/models/tune_model.py
+    deps:
+    - ./src/models/tune_model.py
+    - ./data/processed/clean_data.csv
+    params:
+    - train_model.test_size
+    - train_model.repo_name
+    - train_model.repo_owner
+    - tune_model.n_trials
+    - tune_model.experiment_name
+    - tune_model.experiment_description
+    - tune_model.max_features
+    - tune_model.ngram_range
+    - tune_model.vectorizer_type
+    outs:
+    - ./models/fine_tunned/
+    - ./figures/tunning/
+

@@ -188,7 +188,12 @@ def main() -> None:
                     mlflow.log_metric(f"{label}_{metric}", value)
 
         # log confusion matrix
-        cm_path = conf_matrix(y_test, y_pred, path=f"{home_dir}/figures")
+        pathlib.Path.mkdir(
+            pathlib.Path(f"{home_dir}/figures/tunning"),
+            parents=True,
+            exist_ok=True,
+        )
+        cm_path = conf_matrix(y_test, y_pred, path=f"{home_dir}/figures/tunning")
         mlflow.log_artifact(cm_path, "confusion_matrix")
 
         # log vectorizer object
@@ -207,4 +212,4 @@ if __name__ == "__main__":
     infologger.info("tune_model.py as __main__")
     main()
 
-# log the vectorizer as well
+# log the vectorizer as well - done
