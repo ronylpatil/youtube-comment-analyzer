@@ -78,7 +78,6 @@ def run_experiment(
 
     # set mlflow experiment name
     mlflow.set_experiment(experiment_name)
-    # experiment_description = f"unigram vs bigram vs trigram"
     experiment_description = experiment_description
     mlflow.set_experiment_tag("mlflow.note.content", experiment_description)
 
@@ -155,7 +154,7 @@ def run_experiment(
         # log confusion matrix
         cm_path = conf_matrix(y_test, y_pred, path=path)
         mlflow.log_artifact(cm_path, "confusion_matrix")
-        
+
         # log vectorizer object
         mlflow.log_artifact(vect_obj_path, artifact_path="vectorizer")
 
@@ -210,7 +209,11 @@ def feature_extraction(
             infologger.info(
                 f"bow_vectorizer saved successfully, path: {vectorizer_path}/bow/bow_{n_gram_name}_{max_features}.joblib"
             )
-            return X_train_vect, X_test_vect, f"{vectorizer_path}/bow/bow_{n_gram_name}_{max_features}.joblib"
+            return (
+                X_train_vect,
+                X_test_vect,
+                f"{vectorizer_path}/bow/bow_{n_gram_name}_{max_features}.joblib",
+            )
     elif vectorizer_type == "tfidf":
         try:
             tfidf = TfidfVectorizer(
@@ -231,7 +234,11 @@ def feature_extraction(
             infologger.info(
                 f"tfidf_vectorizer saved successfully, path: {vectorizer_path}/tfidf/tfidf_{n_gram_name}_{max_features}.joblib"
             )
-            return X_train_vect, X_test_vect, f"{vectorizer_path}/tfidf/tfidf_{n_gram_name}_{max_features}.joblib"
+            return (
+                X_train_vect,
+                X_test_vect,
+                f"{vectorizer_path}/tfidf/tfidf_{n_gram_name}_{max_features}.joblib",
+            )
 
 
 def train_model(
@@ -324,19 +331,16 @@ def main() -> None:
 
     curr_time = datetime.now().strftime("%d%m%y-%H%M%S")
     pathlib.Path.mkdir(
-        pathlib.Path(f"{home_dir}/models/experiments"),       # __make_change_here__
-        # pathlib.Path(f"{home_dir}/models/Exp-3/"),
+        pathlib.Path(f"{home_dir}/models/experiments"),
         parents=True,
         exist_ok=True,
     )
-    model_dir = f"{home_dir}/models/experiments"  # __make_change_here__
-    # model_dir = f"{home_dir}/models/Exp-3/"  # __make_change_here__
+    model_dir = f"{home_dir}/models/experiments"
     pathlib.Path.mkdir(
         pathlib.Path(f"{home_dir}/figures/training"),
         parents=True,
         exist_ok=True,
     )
-
 
     for model_name in params["train_model"]["model_name"]:
         for vectorizer_type in params["build_features"]["vectorizer_type"]:
@@ -363,11 +367,3 @@ def main() -> None:
 if __name__ == "__main__":
     infologger.info("train_model.py as __main__")
     main()
-
-
-# implement script to fetch the registered model from dagshub - done
-# some problem in exp 3, only few models saved in local - fix this issue (create directory and put model in it) - done
-# fine tune lgbm - done
-# create tune_model.py - done
-# cover lightgbm and catboost campusx - lightgbm done
-# use optuna - done

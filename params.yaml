@@ -24,9 +24,8 @@ train_model:
   repo_owner: ronylpatil
   test_size: 0.25
   model_name: [gradient_boost]         # ____change_this____
-  experiment: "Exp-3"
-  experiment_name: "Exp 3 - Unigram vs Bigram vs Trigram"               # ____change_this____
-  experiment_description: "unigram vs bigram vs trigram"        # ____change_this____
+  experiment_name: "Exp 3 - Unigram vs Bigram vs Trigram"               
+  experiment_description: "unigram vs bigram vs trigram"        
   hyperparams:
     random_forest: 
       n_estimators: 5
