@@ -39,7 +39,6 @@ stages:
           - 2
         build_features.vectorizer_type:
         - bow
-        - tfidf
     outs:
     - path: ./data/processed/clean_data.csv
       hash: md5
@@ -65,10 +64,9 @@ stages:
           - 2
         build_features.vectorizer_type:
         - bow
-        - tfidf
-        train_model.experiment: Exp-2
-        train_model.experiment_description: bow vs tfidf vectorization comparision
-        train_model.experiment_name: Exp 2 - BoW vs TF-IDF
+        train_model.experiment: Exp-3
+        train_model.experiment_description: unigram vs bigram vs trigram
+        train_model.experiment_name: Exp 3 - Unigram vs Bigram vs Trigram
         train_model.hyperparams:
           random_forest:
             n_estimators: 5
@@ -82,7 +80,7 @@ stages:
           gradient_boost:
             loss: log_loss
             learning_rate: 0.1
-            n_estimators: 100
+            n_estimators: 5
             subsample: 1.0
             criterion: friedman_mse
             max_depth: 4
@@ -99,25 +97,25 @@ stages:
             loss_function: MultiClass
             eval_metric: TotalF1
         train_model.model_name:
-        - random_forest
+        - gradient_boost
         train_model.repo_name: youtube-comment-analyzer
         train_model.repo_owner: ronylpatil
         train_model.test_size: 0.25
     outs:
     - path: ./figures/training/
       hash: md5
-      md5: ec1a7d20a71e77a010a176615e816835.dir
-      size: 278125
-      nfiles: 12
-    - path: ./models/Exp-2/
+      md5: 981caaaf95d23dfe2afcd54f8435946c.dir
+      size: 300783
+      nfiles: 13
+    - path: ./models/Exp-3/
       hash: md5
-      md5: 9a3ac1c4de0b93ca03593317ef655d58.dir
-      size: 10802
-      nfiles: 2
+      md5: c4a6514e3bc068e117bf1eb5e1cdfef6.dir
+      size: 54524
+      nfiles: 1
     - path: ./vectorizer/
       hash: md5
-      md5: b48ae6e3c9f6c9fdc9c772a5623837ed.dir
-      size: 396340
+      md5: 1d3746adc9db4c620245225c92e18ca0.dir
+      size: 396399
       nfiles: 4
   tune_model:
     cmd: python src/models/tune_model.py
