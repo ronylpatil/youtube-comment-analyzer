@@ -32,7 +32,7 @@ infologger.info("*** Executing: train_model.py ***")
 def run_experiment(
     df: pd.DataFrame,
     max_features: int,
-    model_params: dict,
+    # model_params: dict,
     path: str,  # path where confusion matrix will be saved
     test_size: float,
     experiment_name: str,
@@ -123,9 +123,9 @@ def run_experiment(
         mlflow.log_param("vectorizer_max_features", max_features)
 
         # log model hyper-parameters
-        if model_params[model_name]:
-            for i, j in model_params[model_name].items():
-                mlflow.log_param(i, j)
+        # if model_params[model_name]:
+        #     for i, j in model_params[model_name].items():
+        #         mlflow.log_param(i, j)
 
         model_signature = infer_signature(X_train_vect, y_train)
 
@@ -134,7 +134,7 @@ def run_experiment(
             X_train_vect,
             y_train,
             X_test_vect,
-            params=model_params[model_name],
+            # params=model_params[model_name],
             model_name=model_name,
         )
         infologger.info(f"{model_name} model trained successfully")
@@ -238,13 +238,13 @@ def train_model(
     x_train: np.ndarray,
     y_train: np.ndarray,
     x_test: np.ndarray,
-    params: dict,
+    # params: dict,
     model_name: str,
 ) -> pd.Series:
     # train multiple models
     if model_name == "random_forest":
         try:
-            model = RandomForestClassifier(**params)
+            model = RandomForestClassifier(n_estimators=5)
             model.fit(x_train, y_train)
         except Exception as e:
             infologger.critical(
@@ -256,7 +256,7 @@ def train_model(
             return y_pred, model
     elif model_name == "gradient_boost":
         try:
-            model = GradientBoostingClassifier(**params)
+            model = GradientBoostingClassifier()
             model.fit(x_train, y_train)
         except Exception as e:
             infologger.critical(
@@ -268,7 +268,7 @@ def train_model(
             return y_pred, model
     elif model_name == "xgb":
         try:
-            model = xgb.XGBClassifier(**params, num_class=3)
+            model = xgb.XGBClassifier(num_class=3)
             model.fit(x_train, y_train)
         except Exception as e:
             infologger.critical(
@@ -294,7 +294,7 @@ def train_model(
             return y_pred, model
     elif model_name == "catboost":
         try:
-            model = CatBoostClassifier(**params)
+            model = CatBoostClassifier()
             x_train = x_train.astype(float)
             x_test = x_test.astype(float)
             model.fit(x_train, y_train)
@@ -324,12 +324,12 @@ def main() -> None:
 
     curr_time = datetime.now().strftime("%d%m%y-%H%M%S")
     pathlib.Path.mkdir(
-        pathlib.Path(f"{home_dir}/models/Exp-3/{curr_time}"),
+        pathlib.Path(f"{home_dir}/models/{params['train_model']['experiment']}/{curr_time}"),       # __make_change_here__
         # pathlib.Path(f"{home_dir}/models/Exp-3/"),
         parents=True,
         exist_ok=True,
-    )  # __make_change_here__
-    model_dir = f"{home_dir}/models/Exp-3/{curr_time}"  # __make_change_here__
+    )
+    model_dir = f"{home_dir}/models/{params['train_model']['experiment']}/{curr_time}"  # __make_change_here__
     # model_dir = f"{home_dir}/models/Exp-3/"  # __make_change_here__
     pathlib.Path.mkdir(
         pathlib.Path(f"{home_dir}/figures/training"),
@@ -338,26 +338,26 @@ def main() -> None:
     )
 
 
-    for model_name in params["train_model"]["model_name"]:
-        for vectorizer_type in params["build_features"]["vectorizer_type"]:
-            for n_gram in params["build_features"]["n_gram"]:
-                for max_features in params["build_features"]["max_features"]:
-                    run_experiment(
-                        df=df,
-                        max_features=max_features,
-                        model_name=model_name,
-                        experiment_name=params["train_model"]["experiment_name"],
-                        experiment_description=params["train_model"][
-                            "experiment_description"
-                        ],
-                        vectorizer_type=vectorizer_type,
-                        n_gram=n_gram,
-                        model_params=params["train_model"]["hyperparams"],
-                        path=f"{home_dir}/figures/training",
-                        test_size=params["train_model"]["test_size"],
-                        model_dir=f"{model_dir}",
-                        vectorizer_path=f"{home_dir}/vectorizer",
-                    )
+    # for model_name in params["train_model"]["model_name"]:
+    #     for vectorizer_type in params["build_features"]["vectorizer_type"]:
+    #         for n_gram in params["build_features"]["n_gram"]:
+    #             for max_features in params["build_features"]["max_features"]:
+    run_experiment(
+        df=df,
+        max_features=params["build_features"]["max_features"][0],
+        model_name=params["train_model"]["model_name"][0],
+        experiment_name=params["train_model"]["experiment_name"],
+        experiment_description=params["train_model"][
+            "experiment_description"
+        ],
+        vectorizer_type=params["build_features"]["vectorizer_type"][0],
+        n_gram=params["build_features"]["n_gram"][0],
+        # model_params=params["train_model"]["hyperparams"],
+        path=f"{home_dir}/figures/training",
+        test_size=params["train_model"]["test_size"],
+        model_dir=f"{model_dir}",
+        vectorizer_path=f"{home_dir}/vectorizer",
+    )
 
 
 if __name__ == "__main__":
