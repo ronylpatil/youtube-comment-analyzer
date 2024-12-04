@@ -14,7 +14,6 @@ import pandas as pd
 import xgboost as xgb  # type: ignore
 import lightgbm as lgb  # type: ignore
 from typing import Tuple
-from datetime import datetime
 from src.logger import infologger
 from gensim.models import Word2Vec
 from catboost import CatBoostClassifier  # type: ignore
@@ -329,7 +328,6 @@ def main() -> None:
 
     df = loadData(f"{home_dir}/data/processed/clean_data.csv").dropna()
 
-    curr_time = datetime.now().strftime("%d%m%y-%H%M%S")
     pathlib.Path.mkdir(
         pathlib.Path(f"{home_dir}/models/experiments"),
         parents=True,

@@ -136,7 +136,7 @@ stages:
         tune_model.experiment_description: fine tunning lightgbm model using optuna
         tune_model.experiment_name: Exp 4 - Fine Tunning
         tune_model.max_features: 10000
-        tune_model.n_trials: 1
+        tune_model.n_trials: 2
         tune_model.ngram_range:
         - 1
         - 2
@@ -144,11 +144,11 @@ stages:
     outs:
     - path: ./figures/tunning/
       hash: md5
-      md5: 46aa12824f15e600572d85f4838a21a6.dir
-      size: 22818
+      md5: 75ff5ab63b506553315299f3c664a78f.dir
+      size: 23203
       nfiles: 1
     - path: ./models/fine_tunned/
       hash: md5
-      md5: e9c3e3073ac43cc5da977ff63ad0444e.dir
-      size: 3952636
+      md5: 279f766b0a36721544912ca2b78557fb.dir
+      size: 5853228
       nfiles: 1

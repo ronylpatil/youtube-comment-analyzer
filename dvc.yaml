@@ -67,6 +67,7 @@ stages:
     - tune_model.ngram_range
     - tune_model.vectorizer_type
     outs:
-    - ./models/fine_tunned/
+    - ./models/fine_tunned/:
+       persist: true
     - ./figures/tunning/
 
