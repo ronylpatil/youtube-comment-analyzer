@@ -104,18 +104,18 @@ stages:
     outs:
     - path: ./figures/training/
       hash: md5
-      md5: b3141dd391e56049264e44168c997f79.dir
-      size: 167415
-      nfiles: 7
+      md5: 7836b88034922162cb4dcc62baf3e01c.dir
+      size: 195066
+      nfiles: 8
     - path: ./models/Exp-1/
       hash: md5
-      md5: d492c0eae934a4cf238522c5ab2505c4.dir
-      size: 39626466
+      md5: af01127675e9e6027dc51e1acc3037a6.dir
+      size: 39498866
       nfiles: 2
     - path: ./vectorizer/
       hash: md5
-      md5: 57f0b5b7406880444685e41087a725f4.dir
-      size: 396466
+      md5: d4d4d5d8bc4f8bac1c05c1e14d533c40.dir
+      size: 396345
       nfiles: 4
   tune_model:
     cmd: python src/models/tune_model.py
