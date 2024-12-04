@@ -44,7 +44,7 @@ stages:
     - train_model.hyperparams
     - train_model.test_size
     outs:
-    - ./models/${train_model.experiment}/:
+    - ./models/experiments/:
        persist: true
     - ./figures/training/:
        persist: true

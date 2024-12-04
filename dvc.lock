@@ -53,8 +53,8 @@ stages:
       size: 10716259
     - path: ./src/models/train_model.py
       hash: md5
-      md5: 3d0bafc133e0ccd829328c10b0016a03
-      size: 14155
+      md5: 779bbe850c142abcfc3170e565e31756
+      size: 13955
     params:
       params.yaml:
         build_features.max_features:
@@ -71,7 +71,7 @@ stages:
           random_forest:
             n_estimators: 5
             criterion: gini
-            max_depth: 3
+            max_depth: 7
             min_samples_split: 500
             min_samples_leaf: 1000
             max_leaf_nodes: 70
@@ -80,7 +80,7 @@ stages:
           gradient_boost:
             loss: log_loss
             learning_rate: 0.1
-            n_estimators: 5
+            n_estimators: 1
             subsample: 1.0
             criterion: friedman_mse
             max_depth: 4
@@ -104,18 +104,18 @@ stages:
     outs:
     - path: ./figures/training/
       hash: md5
-      md5: 981caaaf95d23dfe2afcd54f8435946c.dir
-      size: 300783
-      nfiles: 13
-    - path: ./models/Exp-3/
+      md5: d7866a4973c1f08a4d7ac8de4fc860f8.dir
+      size: 410219
+      nfiles: 18
+    - path: ./models/experiments/
       hash: md5
-      md5: c4a6514e3bc068e117bf1eb5e1cdfef6.dir
-      size: 54524
+      md5: 8d0631b28e6fba35ec81acc8ed8e7024.dir
+      size: 17869
       nfiles: 1
     - path: ./vectorizer/
       hash: md5
-      md5: 1d3746adc9db4c620245225c92e18ca0.dir
-      size: 396399
+      md5: d767a80beaf652f9b03efff9d0c43de7.dir
+      size: 396541
       nfiles: 4
   tune_model:
     cmd: python src/models/tune_model.py
