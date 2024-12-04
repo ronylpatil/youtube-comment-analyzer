@@ -39,6 +39,7 @@ stages:
           - 2
         build_features.vectorizer_type:
         - bow
+        - tfidf
     outs:
     - path: ./data/processed/clean_data.csv
       hash: md5
@@ -53,8 +54,8 @@ stages:
       size: 10716259
     - path: ./src/models/train_model.py
       hash: md5
-      md5: afd0ac8871a659eb7a3e5132bedd2330
-      size: 13901
+      md5: 3d0bafc133e0ccd829328c10b0016a03
+      size: 14155
     params:
       params.yaml:
         build_features.max_features:
@@ -64,14 +65,15 @@ stages:
           - 2
         build_features.vectorizer_type:
         - bow
-        train_model.experiment: Exp-1
-        train_model.experiment_description: training baseline models for benchmark
-        train_model.experiment_name: Exp 1 - Baseline Model
+        - tfidf
+        train_model.experiment: Exp-2
+        train_model.experiment_description: bow vs tfidf vectorization comparision
+        train_model.experiment_name: Exp 2 - BoW vs TF-IDF
         train_model.hyperparams:
           random_forest:
-            n_estimators: 20
+            n_estimators: 5
             criterion: gini
-            max_depth: 7
+            max_depth: 3
             min_samples_split: 500
             min_samples_leaf: 1000
             max_leaf_nodes: 70
@@ -104,18 +106,18 @@ stages:
     outs:
     - path: ./figures/training/
       hash: md5
-      md5: 7836b88034922162cb4dcc62baf3e01c.dir
-      size: 195066
-      nfiles: 8
-    - path: ./models/Exp-1/
+      md5: ec1a7d20a71e77a010a176615e816835.dir
+      size: 278125
+      nfiles: 12
+    - path: ./models/Exp-2/
       hash: md5
-      md5: af01127675e9e6027dc51e1acc3037a6.dir
-      size: 39498866
+      md5: 9a3ac1c4de0b93ca03593317ef655d58.dir
+      size: 10802
       nfiles: 2
     - path: ./vectorizer/
       hash: md5
-      md5: d4d4d5d8bc4f8bac1c05c1e14d533c40.dir
-      size: 396345
+      md5: b48ae6e3c9f6c9fdc9c772a5623837ed.dir
+      size: 396340
       nfiles: 4
   tune_model:
     cmd: python src/models/tune_model.py
