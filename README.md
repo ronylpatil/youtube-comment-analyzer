@@ -26,8 +26,8 @@ Add excalidraw workflow here
 
 
 ### Links
-[![upstash](https://img.shields.io/badge/redis_server-click_here-red?style=for-the-badge&logo=redis&url=https://console.upstash.com/redis)](https://console.upstash.com/redis) 
 [![dagshub](https://img.shields.io/badge/dagshub-click_here-black?style=for-the-badge&logo=mlflow&url=https://dagshub.com/ronylpatil/youtube-comment-analyzer)](https://dagshub.com/ronylpatil/youtube-comment-analyzer)
+[![upstash](https://img.shields.io/badge/redis_server-click_here-red?style=for-the-badge&logo=redis&url=https://console.upstash.com/redis)](https://console.upstash.com/redis) 
 [![blog](https://img.shields.io/badge/blog-click_here-green?style=for-the-badge&logo=medium&url=https://medium.com/towards-artificial-intelligence/supercharge-fastapi-with-redis-74f2e70e0d4f)](https://medium.com/towards-artificial-intelligence/supercharge-fastapi-with-redis-74f2e70e0d4f)
 
 
