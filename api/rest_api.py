@@ -31,10 +31,20 @@ app = FastAPI()
 
 # load ml model and vectorizer
 try:
+    # load model info
+    model_info_path = f"{home_dir}/prod/prod_model/model_details.json"
+    with open(model_info_path, 'r') as jsn:
+        model_details = json.load(jsn)
+    
+    # load ml model
     model = joblib.load(
-        f"{home_dir}/models/fine_tunned/121124-220055/tunned_model.joblib"  # inout: 5k
+        f"{home_dir}/prod/prod_model/model.joblib"  # inout: 10k
     )
-    vectorizer = joblib.load(f"{home_dir}/vectorizer/bow/bow_bigram_5000.joblib")
+    logger.info(f"ml model loaded successfully!")
+    
+    # load vectorizer
+    vectorizer = joblib.load(f"{home_dir}/prod/prod_model/bow_bigram_10000.joblib")
+    logger.info("vectorizer loaded successfully!")
 except Exception as e:
     logger.error(
         f"unable to load model or vectorizer, check the potential issue. error: {e}"
@@ -108,14 +118,18 @@ async def prediction_endpoint(request: PredictionRequest) -> JSONResponse:
         logger.info(f"cache miss!, computing prediction...")
         prediction = await predict(request.data)
         r = {"comment": request.data, "sentiment": prediction}
-        rd.set(cache_key, json.dumps(r), ex=1000)
+        rd.set(cache_key, json.dumps(r), ex=60)
         return JSONResponse(r)
 
 
 @app.get("/")
 def read_root():
-    return "Hello World!"
+    return "Hello World!"   
 
+
+@app.get("/model-details")
+def get_model_info():
+    return model_details
 
 # [it will look for changes in whole project directory, to limit this score use --reload-dir ./dir_name]
 # server cmd: uvicorn api.rest_api:app --reload --reload-dir ./api --host 127.0.0.1 --port 8000
