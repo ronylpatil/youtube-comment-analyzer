@@ -61,7 +61,7 @@ app.add_middleware(
 
 # connecting with redis db
 rd = redis.Redis(
-    host="clever-mayfly-27272.upstash.io", port=6379, password=key, ssl=True
+    host="thankful-guinea-27129.upstash.io", port=6379, password=key, ssl=True
 )
 
 
@@ -91,6 +91,8 @@ async def predict(data: str):
         vect_data = vectorizer.transform([clean_data]).toarray()
         logger.info("data vectorized successfully")
         output = model.predict(vect_data)[0]
+        # {-1: 0, 0: 1, 1: 2}
+        # {0: Negative, 1: Neutral, 2: Positive}
         logger.info(f"model prediction: {output}")
         return output
     except Exception as e:
