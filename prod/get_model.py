@@ -3,6 +3,7 @@ import json
 import click
 import joblib
 import mlflow
+import pathlib
 from mlflow.sklearn import load_model
 from mlflow.tracking import MlflowClient
 
@@ -14,13 +15,28 @@ def fetch_model(mlflow_uri, registered_model_name, alias) -> click.Tuple:
         model_details = client.get_model_version_by_alias(
             name=registered_model_name, alias=alias
         )
+
         model = load_model(f"models:/{model_details.name}@{model_details.aliases[0]}")
+
+        try:
+            artifact_path = client.list_artifacts(
+                run_id=model_details.run_id, path="vectorizer"
+            )
+        except Exception as e:
+            print(
+                f"vectorier is not logged in existing experiment, check artifacts for potential issue. exception: {e}"
+            )
+        else:
+            vectorizer_path = client.download_artifacts(
+                run_id=model_details.run_id, path=f"{artifact_path[0].path}"
+            )
+            vectorizer = joblib.load(vectorizer_path)
     except Exception as e:
         print(
-            f"unable to fetch model from mlflow server, check get_model.py >> get_model(...) for potential issue. exception: {e}"
+            f"unable to fetch model from mlflow server, check get_model.py >> fetch_model(...) for potential issue. exception: {e}"
         )
     else:
-        return model, model_details
+        return model, model_details, vectorizer
 
 
 @click.command()
@@ -28,12 +44,21 @@ def fetch_model(mlflow_uri, registered_model_name, alias) -> click.Tuple:
 @click.argument("registered_model_name")
 @click.argument("alias")
 def save_model(mlflow_uri, registered_model_name, alias) -> None:
-    model, model_details = fetch_model(
+    model, model_details, vectorizer = fetch_model(
         mlflow_uri=mlflow_uri, registered_model_name=registered_model_name, alias=alias
     )
-    joblib.dump(model, "./model.joblib")
 
-    with open("./model_details.json", "w") as jsn:
+    dir_path = pathlib.Path(f"{pathlib.Path(__file__).parent.as_posix()}/prod_model1")
+    pathlib.Path.mkdir(
+        dir_path,
+        parents=True,
+        exist_ok=True,
+    )
+
+    joblib.dump(model, f"{dir_path}/model.joblib")
+    joblib.dump(vectorizer, f"{dir_path}/vectorizer.joblib")
+
+    with open(f"{dir_path}/model_details.json", "w") as jsn:
         json.dump(
             {
                 "name": model_details.name,
@@ -49,9 +74,9 @@ if __name__ == "__main__":
     save_model()
 
 
+# always taking default path, make it flexible - bug fix pending
+
 # alias = "production"
 # registered_model_name = "lightgbm_v1.0"
 # mlflow_uri = "https://dagshub.com/ronylpatil/youtube-comment-analyzer.mlflow"
 # cmd: python prod/get_model.py "https://dagshub.com/ronylpatil/youtube-comment-analyzer.mlflow" "lightgbm_v1.0" "production"
-
-# solve model dir bug -> only 2 dir are tracked by DVC each folder should be tracked by DVC
