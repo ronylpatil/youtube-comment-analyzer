@@ -1,6 +1,6 @@
 import re
+import os
 import json
-import yaml  # type: ignore
 import redis  # type: ignore
 import joblib  # type: ignore
 import logging
@@ -11,6 +11,10 @@ from pydantic import BaseModel  # type: ignore
 from fastapi.responses import JSONResponse  # type: ignore
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
 from src.features.build_features import preprocessText
+
+# redis server details
+redis_host = os.getenv("REDIS_HOST")  
+redis_key = os.getenv("REDIS_KEY") 
 
 # Create a custom log format
 log_format = "%(levelname)s:     %(message)s"
@@ -24,9 +28,9 @@ logger = logging.getLogger(__name__)
 # load password from secrets.yaml
 curr_dir = pathlib.Path(__file__)
 home_dir = curr_dir.parent.parent.as_posix()
-key = yaml.safe_load(
-    open(f"{pathlib.Path(__name__).parent.parent.as_posix()}/secrets.yaml")
-)["redis_key"]
+# key = yaml.safe_load(
+#     open(f"{pathlib.Path(__name__).parent.parent.as_posix()}/secrets.yaml")
+# )["redis_key"]
 
 app = FastAPI()
 
@@ -60,7 +64,7 @@ app.add_middleware(
 
 # connecting with redis db
 rd = redis.Redis(
-    host="thankful-guinea-27129.upstash.io", port=6379, password=key, ssl=True
+    host=redis_host, port=6379, password=redis_key, ssl=True
 )
 
 
