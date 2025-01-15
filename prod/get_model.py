@@ -48,7 +48,7 @@ def save_model(mlflow_uri, registered_model_name, alias) -> None:
         mlflow_uri=mlflow_uri, registered_model_name=registered_model_name, alias=alias
     )
 
-    dir_path = pathlib.Path(f"{pathlib.Path(__file__).parent.as_posix()}/prod_model1")
+    dir_path = pathlib.Path(f"{pathlib.Path(__file__).parent.as_posix()}/prod_model")         # running in local sys or CICD pipeline
     pathlib.Path.mkdir(
         dir_path,
         parents=True,
@@ -72,9 +72,6 @@ def save_model(mlflow_uri, registered_model_name, alias) -> None:
 
 if __name__ == "__main__":
     save_model()
-
-
-# always taking default path, make it flexible - bug fix pending
 
 # alias = "production"
 # registered_model_name = "lightgbm_v1.0"

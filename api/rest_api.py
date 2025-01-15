@@ -1,3 +1,4 @@
+import re
 import json
 import yaml  # type: ignore
 import redis  # type: ignore
@@ -33,15 +34,13 @@ app = FastAPI()
 try:
     # load model info
     model_info_path = f"{home_dir}/prod/prod_model/model_details.json"
-    with open(model_info_path, 'r') as jsn:
+    with open(model_info_path, "r") as jsn:
         model_details = json.load(jsn)
-    
+
     # load ml model
-    model = joblib.load(
-        f"{home_dir}/prod/prod_model/model.joblib"  # inout: 10k
-    )
+    model = joblib.load(f"{home_dir}/prod/prod_model/model.joblib")  # inout: 10k
     logger.info(f"ml model loaded successfully!")
-    
+
     # load vectorizer
     vectorizer = joblib.load(f"{home_dir}/prod/prod_model/bow_bigram_10000.joblib")
     logger.info("vectorizer loaded successfully!")
@@ -78,6 +77,38 @@ class PredictionResponse(BaseModel):
 
 def get_cache_key(data: str) -> str:
     return hashlib.md5(data.encode()).hexdigest()
+
+
+def preprocessText(comment: str) -> str:  
+    # remove emojies from comments
+    emoji_pattern = re.compile(
+        "["
+        "\U0001F600-\U0001F64F"  # Emoticons
+        "\U0001F300-\U0001F5FF"  # Miscellaneous Symbols and Pictographs
+        "\U0001F680-\U0001F6FF"  # Transport and Map Symbols
+        "\U0001F1E6-\U0001F1FF"  # Flags
+        "\U0001F900-\U0001F9FF"  # Supplemental Symbols and Pictographs
+        "\U00002600-\U000026FF"  # Miscellaneous Symbols
+        "\U00002700-\U000027BF"  # Dingbats
+        "]+",
+        flags=re.UNICODE,
+    )
+    comment = re.sub(emoji_pattern, " ", comment)
+    # remove hindi comments
+    hindi_pattern = re.compile(r"[\u0900-\u097F]")
+    comment = re.sub(hindi_pattern, " ", comment)
+    comment = comment.lower()
+    # remove url's
+    url_pattern = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+    comment = re.sub(url_pattern, "", comment)
+    comment = re.sub(r"\n", " ", comment)
+    # remove unusual characters
+    comment = re.sub(r"[^a-zA-Z0-9\s₹!?.,]", "", comment)
+    # remove extra spaces
+    comment = re.sub(r"\s+", " ", comment)
+    comment = comment.strip()
+
+    return comment
 
 
 async def predict(data: str):
@@ -126,12 +157,13 @@ async def prediction_endpoint(request: PredictionRequest) -> JSONResponse:
 
 @app.get("/")
 def read_root():
-    return "Hello World!"   
+    return "Hello World!"
 
 
 @app.get("/model-details")
 def get_model_info():
     return model_details
+
 
 # [it will look for changes in whole project directory, to limit this score use --reload-dir ./dir_name]
 # server cmd: uvicorn api.rest_api:app --reload --reload-dir ./api --host 127.0.0.1 --port 8000
