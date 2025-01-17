@@ -64,16 +64,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Print Current Directory before-download       # for debug purpose
-        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer
+        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model
 
       - name: Download Model Artifacts           # download the previously saved artifacts
         uses: actions/download-artifact@v4
         with:
-          name: model
-          path: /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer
+          name: artifacts
+          path: /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model
       
       - name: Print Current Directory after-download     # for debugging
-        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer
+        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model
 
       # push img to docker hub
       - name: Build Docker Image    
