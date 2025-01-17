@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install Utilities     # install utilities required to fetch model from backend
         run: |
@@ -33,7 +33,7 @@ jobs:
           python ./prod/get_model.py ${{ secrets.mlflow_uri }} ${{ secrets.registered_model_name }} ${{ secrets.alias }}
       
       - name: Upload Model Artifact            # save the artifacts so that we can utilise it in next stage     
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: model
           # in path give correct repository name as here "cicd-aws/cicd-aws" 
@@ -52,13 +52,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Print Current Directory before-download       # for debug purpose
         run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer
 
       - name: Download Model Artifacts           # download the previously saved artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: model
           path: /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer
