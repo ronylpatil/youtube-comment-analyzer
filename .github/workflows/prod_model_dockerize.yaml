@@ -1,0 +1,78 @@
+name: production model dockerization
+on:
+  push:
+    branches:
+      - main
+    paths:                # if any changes detected in below dir then runner'll trigger cicd pipeline
+      - ./src/**
+      - .github/**
+      - ./prod/**
+      - ./api/**
+      - Dockerfile
+      - dev_requirements.txt
+  pull_request: 
+    branches:
+      - main
+
+jobs:
+  pull-latest-model:   
+    name: pull latest production model         
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Utilities     # install utilities required to fetch model from backend
+        run: |
+            python -m pip install --upgrade pip
+            if [ -f dev_requirements.txt ]; then pip install -r dev_requirements.txt; fi 
+
+      - name: Pull Latest Model From Mlflow   # below script will executed and fetch the prod model
+        run: |
+          python ./prod/get_model.py ${{ secrets.mlflow_uri }} ${{ secrets.registered_model_name }} ${{ secrets.alias }}
+      
+      - name: Upload Model Artifact            # save the artifacts so that we can utilise it in next stage     
+        uses: actions/upload-artifact@v2
+        with:
+          name: model
+          # in path give correct repository name as here "cicd-aws/cicd-aws" 
+          path: | 
+            /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/model.joblib    
+            /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/model_details.json
+            /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/vectorizer.joblib
+
+      - name: Print Current Directory          # for debuging purpoer, u can remove it
+        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer
+
+  build-nd-push-docker-image:  
+    name: build & push img to dockerhub   
+    needs: pull-latest-model      # previous stage must be successfully completed (job dependency)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Print Current Directory before-download       # for debug purpose
+        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer
+
+      - name: Download Model Artifacts           # download the previously saved artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: model
+          path: /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer
+      
+      - name: Print Current Directory after-download     # for debugging
+        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer
+
+      # push img to docker hub
+      - name: Build Docker Image    
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/youtubecommentanalyzer:latest .
+
+      - name: Log-in to Docker Hub    
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker Img     # push the previously built img to dockerhub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/youtubecommentanalyzer:latest
