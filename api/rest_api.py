@@ -26,8 +26,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # load password from secrets.yaml
-curr_dir = pathlib.Path(__file__)
-home_dir = curr_dir.parent.parent.as_posix()
+# curr_dir = pathlib.Path(__file__)
+# home_dir = curr_dir.parent.parent.as_posix()
 # key = yaml.safe_load(
 #     open(f"{pathlib.Path(__name__).parent.parent.as_posix()}/secrets.yaml")
 # )["redis_key"]
@@ -37,16 +37,16 @@ app = FastAPI()
 # load ml model and vectorizer
 try:
     # load model info
-    model_info_path = f"{home_dir}/prod/prod_model/model_details.json"
+    model_info_path = f"{pathlib.Path(__file__)}/prod/prod_model/model_details.json"
     with open(model_info_path, "r") as jsn:
         model_details = json.load(jsn)
 
     # load ml model
-    model = joblib.load(f"{home_dir}/prod/prod_model/model.joblib")  # inout: 10k
+    model = joblib.load(f"{pathlib.Path(__file__)}/prod/prod_model/model.joblib")  # inout: 10k
     logger.info(f"ml model loaded successfully!")
 
     # load vectorizer
-    vectorizer = joblib.load(f"{home_dir}/prod/prod_model/bow_bigram_10000.joblib")
+    vectorizer = joblib.load(f"{pathlib.Path(__file__)}/prod/prod_model/vectorizer.joblib")
     logger.info("vectorizer loaded successfully!")
 except Exception as e:
     logger.error(
