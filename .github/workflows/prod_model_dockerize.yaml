@@ -38,12 +38,15 @@ jobs:
           name: model
           # in path give correct repository name as here "cicd-aws/cicd-aws" 
           path: | 
-            /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/model.joblib    
-            /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/model_details.json
-            /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/vectorizer.joblib
+            /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod_model/model.joblib    
+            /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod_model/model_details.json
+            /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod_model/vectorizer.joblib
 
-      - name: Print Current Directory          # for debuging purpoer, u can remove it
-        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer
+      - name: Print Current Directory Inside prod_model          # for debuging purpoer, u can remove it
+        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod_model/
+
+      - name: Print Current Directory Outside prod_model          # for debuging purpoer, u can remove it
+        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/
 
   build-nd-push-docker-image:  
     name: build & push img to dockerhub   
