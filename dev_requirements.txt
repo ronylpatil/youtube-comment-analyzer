@@ -1,3 +1,6 @@
 joblib==1.4.2
 mlflow==2.17.2
 scikit_learn==1.5.2
+click==8.1.7
+mlflow_skinny==2.17.2
+lightgbm==4.5.0
