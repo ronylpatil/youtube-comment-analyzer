@@ -1,5 +1,5 @@
-ARG PYTHON_VERSION=3.9.2
-FROM python:${PYTHON_VERSION}-slim as base
+ARG PYTHON_VERSION=3.10.3
+FROM python:${PYTHON_VERSION}-slim-buster as base
 
 # Expose the port that the application listens on.
 EXPOSE 8000
@@ -20,7 +20,7 @@ COPY . /app
 
 # Install pip req
 COPY docker_requirements.txt .
-RUN pip install -r docker_requirements.txt 
+RUN pip install --no-cache-dir -r docker_requirements.txt 
 
 # Run the application
 CMD uvicorn api.rest_api:app --reload --reload-dir ./api --host 127.0.0.1 --port 8000
