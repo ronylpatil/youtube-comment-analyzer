@@ -5,7 +5,6 @@
 pytest
 tox
 black
-redis
 fastapi
 auto_mix_prep==0.2.0
 boto3==1.35.59
@@ -22,3 +21,5 @@ pandas==2.2.3
 PyYAML==6.0.2
 scikit_learn==1.5.2
 xgboost==2.1.2
+pydantic==2.10.5
+redis==5.2.0
