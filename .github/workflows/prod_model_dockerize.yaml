@@ -41,7 +41,7 @@ jobs:
       - name: Upload Model Artifact            # save the artifacts so that we can utilise it in next stage     
         uses: actions/upload-artifact@v4
         with:
-          name: model
+          name: artifacts
           # in path give correct repository name as here "cicd-aws/cicd-aws" 
           path: | 
             /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model/model.joblib    
@@ -67,7 +67,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: artifacts
-          path: /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model
+          path: /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/
       
       # push img to docker hub
       - name: Build Docker Image    
