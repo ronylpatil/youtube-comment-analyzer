@@ -10,6 +10,7 @@ on:
       - ./api/**
       - Dockerfile
       - dev_requirements.txt
+      - docker_requirements.txt
   pull_request: 
     branches:
       - main
@@ -32,11 +33,11 @@ jobs:
         run: |
           python ./prod/get_model.py ${{ secrets.mlflow_uri }} ${{ secrets.registered_model_name }} ${{ secrets.alias }}
 
-      - name: Print Current Directory          # for debuging purpoer, u can remove it
-        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/
+      # - name: Print Current Directory          # for debuging purpoer, u can remove it
+        # run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/
 
-      - name: Print Current Directory (inside prod)           # for debuging purpoer, u can remove it
-        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/
+      # - name: Print Current Directory (inside prod)           # for debuging purpoer, u can remove it
+      #   run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/
       
       - name: Upload Model Artifact            # save the artifacts so that we can utilise it in next stage     
         uses: actions/upload-artifact@v4
@@ -48,11 +49,11 @@ jobs:
             /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model/model_details.json
             /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model/vectorizer.joblib
 
-      - name: Print Current Directory Inside prod_model          # for debuging purpoer, u can remove it
-        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model/
+      # - name: Print Current Directory Inside prod_model          # for debuging purpoer, u can remove it
+      #   run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model/
 
-      - name: Print Current Directory Outside prod_model          # for debuging purpoer, u can remove it
-        run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/
+      # - name: Print Current Directory Outside prod_model          # for debuging purpoer, u can remove it
+      #   run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/
 
   build-nd-push-docker-image:  
     name: build & push img to dockerhub   
