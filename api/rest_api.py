@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware  # type: ignore
 # redis server details
 redis_host = os.getenv("REDIS_HOST")  
 redis_key = os.getenv("REDIS_KEY") 
+PATH = pathlib.Path(__file__).parent.parent
 
 # Create a custom log format
 log_format = "%(levelname)s:     %(message)s"
@@ -36,16 +37,16 @@ app = FastAPI()
 # load ml model and vectorizer
 try:
     # load model info
-    model_info_path = f"{pathlib.Path(__file__)}/prod/prod_model/model_details.json"
+    model_info_path = f"{PATH}/prod/prod_model/model_details.json"
     with open(model_info_path, "r") as jsn:
         model_details = json.load(jsn)
 
     # load ml model
-    model = joblib.load(f"{pathlib.Path(__file__)}/prod/prod_model/model.joblib")  # inout: 10k
+    model = joblib.load(f"{PATH}/prod/prod_model/model.joblib")  # inout: 10k
     logger.info(f"ml model loaded successfully!")
 
     # load vectorizer
-    vectorizer = joblib.load(f"{pathlib.Path(__file__)}/prod/prod_model/vectorizer.joblib")
+    vectorizer = joblib.load(f"{PATH}/prod/prod_model/vectorizer.joblib")
     logger.info("vectorizer loaded successfully!")
 except Exception as e:
     logger.error(
