@@ -10,7 +10,6 @@ from fastapi import FastAPI  # type: ignore
 from pydantic import BaseModel  # type: ignore
 from fastapi.responses import JSONResponse  # type: ignore
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
-from src.features.build_features import preprocessText
 
 # redis server details
 redis_host = os.getenv("REDIS_HOST")  

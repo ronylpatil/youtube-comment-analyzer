@@ -23,4 +23,4 @@ COPY docker_requirements.txt .
 RUN pip install --no-cache-dir -r docker_requirements.txt 
 
 # Run the application
-CMD uvicorn api.rest_api:app --reload --reload-dir ./api --host 127.0.0.1 --port 8000
+CMD uvicorn app.api.rest_api:app --reload --reload-dir ./api --host 127.0.0.1 --port 8000
