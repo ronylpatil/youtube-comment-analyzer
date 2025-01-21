@@ -37,16 +37,16 @@ app = FastAPI()
 # load ml model and vectorizer
 try:
     # load model info
-    model_info_path = f"{root_dir}/prod/prod_model/model_details.json"
+    model_info_path = f"{root_dir}/model_details.json"
     with open(model_info_path, "r") as jsn:
         model_details = json.load(jsn)
 
     # load ml model
-    model = joblib.load(f"{root_dir}/prod/prod_model/model.joblib")  # inout: 10k
+    model = joblib.load(f"{root_dir}/model.joblib")  # inout: 10k
     logger.info(f"ml model loaded successfully!")
 
     # load vectorizer
-    vectorizer = joblib.load(f"{root_dir}/prod/prod_model/vectorizer.joblib")
+    vectorizer = joblib.load(f"{root_dir}/vectorizer.joblib")
     logger.info("vectorizer loaded successfully!")
 except Exception as e:
     logger.error(
