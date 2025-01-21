@@ -4,10 +4,10 @@ on:
     branches:
       - main
     paths:                # if any changes detected in below dir then runner'll trigger cicd pipeline
-      - ./src/**
+      - src/**
       - .github/**
-      - ./prod/**
-      - ./api/**
+      - prod/**
+      - api/**
       - Dockerfile
       - dev_requirements.txt
       - docker_requirements.txt
