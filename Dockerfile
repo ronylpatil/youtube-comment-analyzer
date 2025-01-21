@@ -11,6 +11,9 @@ ENV PYTHONDONTWRITEBYTECODE = 1
 # the application crashes without emitting any logs due to buffering.
 ENV PYTHONUNBUFFERED = 1
 
+# lightgbm model need parallel processing hence installing
+RUN apt-get update && apt-get install -y libgomp1
+
 WORKDIR /app
 # instead of copying everying, manually copy only required files in ./app directory to keep the container size as small as possible
 # COPY ./prod/docker_client.py ./app/prod/docker_client.py
