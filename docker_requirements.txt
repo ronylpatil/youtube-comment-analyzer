@@ -6,3 +6,4 @@ pydantic==2.10.5
 redis==5.2.0
 uvicorn==0.32.0
 lightgbm==4.5.0
+scikit_learn==1.5.2
