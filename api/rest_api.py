@@ -160,14 +160,17 @@ async def prediction_endpoint(request: PredictionRequest) -> JSONResponse:
 
 
 @app.get("/")
-def read_root():
-    return "Hello World!"
+def read_root() -> str:
+    return "Welcome to REST api!"
 
 
 @app.get("/model-details")
-def get_model_info():
+def get_model_info() -> JSONResponse:
     return model_details
 
+@app.get("/health")
+def health() -> JSONResponse:
+    return JSONResponse({"status": "healthy"})
 
 # [it will look for changes in whole project directory, to limit this score use --reload-dir ./dir_name]
 # server cmd: uvicorn api.rest_api:app --reload --reload-dir ./api --host 127.0.0.1 --port 8000
