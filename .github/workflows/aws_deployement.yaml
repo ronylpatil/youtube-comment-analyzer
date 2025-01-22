@@ -8,10 +8,14 @@ on:
 
 jobs:
   push-container-to-codedeploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: push container to codedeploy         
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
       - name: Zip files for deployment      # zip the required files
         if: success()
         run: |

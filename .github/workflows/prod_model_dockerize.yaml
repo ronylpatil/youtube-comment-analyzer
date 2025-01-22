@@ -56,7 +56,7 @@ jobs:
       #   run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/
 
   build-nd-push-docker-image:  
-    name: build & push img to dockerhub   
+    name: build & push img to ECR   
     needs: pull-latest-model      # previous stage must be successfully completed (job dependency)
     runs-on: ubuntu-latest
 
@@ -70,6 +70,7 @@ jobs:
           name: artifacts
           path: /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/
       
+      # login to ecr
       - name: login to AWS ECR
         if: success()
         run: |
@@ -89,6 +90,7 @@ jobs:
         run: |
           docker tag youtube-chrome-plugin:latest 471112948185.dkr.ecr.us-east-1.amazonaws.com/youtube-chrome-plugin:latest
       
+      # push docker img to ecr
       - name: Push Docker Image
         if: success()
         run: |
