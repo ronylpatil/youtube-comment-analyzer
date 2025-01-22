@@ -70,13 +70,27 @@ jobs:
           name: artifacts
           path: /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/
       
-      # push img to docker hub
-      - name: Build Docker Image    
+      - name: login to AWS ECR
+        if: success()
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/youtubecommentanalyzer:latest .
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 471112948185.dkr.ecr.us-east-1.amazonaws.com
 
-      - name: Log-in to Docker Hub    
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      # build docker image
+      - name: Build Docker Image  
+        if: success()
+        run: |
+          docker build -t youtube-chrome-plugin .
 
-      - name: Push Docker Img     # push the previously built img to dockerhub
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/youtubecommentanalyzer:latest
+      # tag docker image
+      - name: Tag Docker Image
+        if: success()
+        run: |
+          docker tag youtube-chrome-plugin:latest 471112948185.dkr.ecr.us-east-1.amazonaws.com/youtube-chrome-plugin:latest
+      
+      - name: Push Docker Image
+        if: success()
+        run: |
+          docker push 471112948185.dkr.ecr.us-east-1.amazonaws.com/youtube-chrome-plugin:latest
+
