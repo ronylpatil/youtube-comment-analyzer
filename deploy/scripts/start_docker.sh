@@ -21,13 +21,6 @@ fi
 
 # container name: ytca-app
 echo "Starting new container..."
-if [ -f .env ]; then
-    # run docker container and pass .env
-    docker run -d -p 80:8000 --env-file .env --name ytca-app 471112948185.dkr.ecr.us-east-1.amazonaws.com/youtube-chrome-plugin:latest    
-else
-    echo ".env file not found. Please ensure its created..."
-    exit 1
-fi
-# docker run -d -p 80:8000 --name ytca-app 471112948185.dkr.ecr.us-east-1.amazonaws.com/youtube-chrome-plugin:latest
+docker run -d -p 80:8000 --name ytca-app 471112948185.dkr.ecr.us-east-1.amazonaws.com/youtube-chrome-plugin:latest
 
 echo "Container started successfully."

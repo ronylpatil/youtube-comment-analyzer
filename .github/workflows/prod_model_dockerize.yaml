@@ -82,7 +82,7 @@ jobs:
       - name: Build Docker Image  
         if: success()
         run: |
-          docker build -t youtube-chrome-plugin .
+          docker build --build-arg REDIS_HOST=${{ secrets.REDIS_HOST }} --build-arg REDIS_KEY=${{ secrets.REDIS_KEY }} -t youtube-chrome-plugin .
 
       # tag docker image
       - name: Tag Docker Image
