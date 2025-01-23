@@ -31,7 +31,7 @@ jobs:
       - name: Upload ZIP to S3      # upload the ZIP to S3
         if: success()
         run: |
-          aws s3 cp deployment.zip s3://ytcacodedeploybucket/deployment.zip
+          aws s3 cp deployment.zip s3://zipcodedeploybucket/deployment.zip
       
       - name: Deploy to AWS CodeDeploy    # deploy to AWS CodeDeploy using the uploaded ZIP file
         if: success()
@@ -39,10 +39,10 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws deploy create-deployment \
-            --application-name YtCommentAnalyzer \
+            --application-name ytca-app \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --deployment-group-name YtCADeploymentGroup \
-            --s3-location bucket=ytcacodedeploybucket,key=deployment.zip,bundleType=zip \
+            --deployment-group-name tycadeploymentgroup \
+            --s3-location bucket=zipcodedeploybucket,key=deployment.zip,bundleType=zip \
             --file-exists-behavior OVERWRITE \
             --region us-east-1
  
