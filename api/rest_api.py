@@ -170,7 +170,7 @@ def get_model_info() -> JSONResponse:
 
 @app.get("/health")
 def health() -> JSONResponse:
-    return JSONResponse({"status": "healthy"})
+    return JSONResponse(content={"status": "healthy"}, status_code=200)
 
 # [it will look for changes in whole project directory, to limit this score use --reload-dir ./dir_name]
 # server cmd: uvicorn api.rest_api:app --reload --reload-dir ./api --host 127.0.0.1 --port 8000

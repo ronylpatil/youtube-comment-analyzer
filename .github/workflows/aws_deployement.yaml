@@ -39,11 +39,11 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws deploy create-deployment \
-            --application-name YTCommentAnalyzer \
+            --application-name YtCommentAnalyzer \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --deployment-group-name YTCommentAnalyzerDeploymentGroup \
+            --deployment-group-name YtCommentAnalyzerDeploymentGroup \
             --s3-location bucket=ytcacodedeploybucket,key=deployment.zip,bundleType=zip \
             --file-exists-behavior OVERWRITE \
             --region us-east-1
-
+ 
 # here pass redis server credentials (REDIS_HOST & REDIS_KEY) 
