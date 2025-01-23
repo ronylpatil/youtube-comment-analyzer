@@ -41,7 +41,7 @@ jobs:
           aws deploy create-deployment \
             --application-name YtCommentAnalyzer \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --deployment-group-name YtCommentAnalyzerDeploymentGroup \
+            --deployment-group-name YtCADeploymentGroup \
             --s3-location bucket=ytcacodedeploybucket,key=deployment.zip,bundleType=zip \
             --file-exists-behavior OVERWRITE \
             --region us-east-1
