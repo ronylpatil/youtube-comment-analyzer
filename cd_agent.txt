@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Update the package list 
+sudo apt-get update -y
+
+#Install Ruby (required by the CodeDeploy agent)
+sudo apt-get install ruby -y
+
+# Download the CodeDeploy agent installer from the correct region
+wget https://aws-codedeploy-ap-southeast-2.s3.ap-southeast-2.amazonaws.com/latest/install
+
+#Make the installer executable
+chmod +x ./install
+
+#Install the CodeDeploy agent.
+sudo ./install auto
+
+#Start the CodeDeploy agent 
+sudo service codedeploy-agent start
+
+
+---------------- Commands -------------------
+# restart ec2 instance from inside - to change target group instances "Healthy"
+sudo shutdown -r now
+
+# install docker on ec2
+sudo apt-get update
+sudo apt-get install docker.io -y
+sudo systemctl start docker
+sudo docker run hello-world
+sudo systemctl enable docker
+docker --version
+sudo usermod -a -G docker $(whoami)
+newgrp docker
+
+Blog: https://medium.com/@srijaanaparthy/step-by-step-guide-to-install-docker-on-ubuntu-in-aws-a39746e5a63d
+
+# basic docker commands
+docker images - list docker images
+docker rmi <image-id> - remove image
+docker pull <repository-name>:<tag> - download image from docker registry
+docker build -t <repository-name>:<tag> . - build image from docker file (. curr dir)
+docker ps - currently running containers
+docker ps -a - list of all containers
+docker run -d -p <host-port>:<container-port> --name <container-name> <image-name> - run the container in detached mode (-d)
+docker stop <container-name or container-id> - stop running container 
+docker kill <container-name or container-id> - stop container immedietly without cleanup
+docker rm <container-name or container-id> - delete stopped container, add -f to force to remove running container
+docker start <container-name or container-id> - restart previously stopped container
+docker restart <container-name or container-id> - stop and restart currently running container
+docker logs -f <container-name or container-id> - show logs of container, -f to follow logs in real time
+docker system prune - cleanup unused containers, network and dangling images (-a to inclued ununsed images)
+
+
+
