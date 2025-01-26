@@ -18,6 +18,8 @@ sudo ./install auto
 #Start the CodeDeploy agent 
 sudo service codedeploy-agent start
 
+---->> sudo cat /var/log/cloud-init-output.log ==> ye cmd userscript ka log show kregi, jisse hume pta chalega ki kuch error to nahi aaya
+
 
 ---------------- Commands -------------------
 # restart ec2 instance from inside - to change target group instances "Healthy"
@@ -26,12 +28,21 @@ sudo shutdown -r now
 # install docker on ec2
 sudo apt-get update
 sudo apt-get install docker.io -y
-sudo systemctl start docker
+sudo systemctl start docker     - when ec2 machine will start, automatically docker will start. we can directly run docker commands
 sudo docker run hello-world
 sudo systemctl enable docker
 docker --version
-sudo usermod -a -G docker $(whoami)
+sudo usermod -a -G docker $(whoami) - after this we can run docker command without using sudo
 newgrp docker
+
+# install aws cli in EC2 instance
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/home/ubuntu/awscliv2.zip"
+unzip -o /home/ubuntu/awscliv2.zip -d /home/ubuntu/
+sudo /home/ubuntu/aws/install
+
+
+
+sudo usermod -aG docker ubuntu - allows the ubuntu user to run Docker commands without needing to use sudo every time
 
 Blog: https://medium.com/@srijaanaparthy/step-by-step-guide-to-install-docker-on-ubuntu-in-aws-a39746e5a63d
 
@@ -50,6 +61,10 @@ docker start <container-name or container-id> - restart previously stopped conta
 docker restart <container-name or container-id> - stop and restart currently running container
 docker logs -f <container-name or container-id> - show logs of container, -f to follow logs in real time
 docker system prune - cleanup unused containers, network and dangling images (-a to inclued ununsed images)
+
+-------------- Deployment Steps (Application Load Balancer - Auto Scaling Group - Launch Template - CodeDeploy)
+
+
 
 
 
