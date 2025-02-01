@@ -1,7 +1,7 @@
 YouTube Comments Analysis
 ==============================
 
-An ML-based solution for real-time sentiment analysis of YouTube comments.
+Perform real-time sentiment analysis on live-streaming YouTube comments.
 
 ### CICD Pipeline
 [![Prod Model Dockerization](https://github.com/ronylpatil/youtube-comment-analyzer/actions/workflows/prod_model_dockerize.yaml/badge.svg)](https://github.com/ronylpatil/youtube-comment-analyzer/actions/workflows/prod_model_dockerize.yaml)
