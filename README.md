@@ -8,7 +8,8 @@ Perform real-time sentiment analysis on live-streaming YouTube comments.
 [![aws deployment](https://github.com/ronylpatil/youtube-comment-analyzer/actions/workflows/aws_deployement.yaml/badge.svg)](https://github.com/ronylpatil/youtube-comment-analyzer/actions/workflows/aws_deployement.yaml)
 
 ### Workflow
-Add excalidraw workflow here
+![workflow](https://github.com/user-attachments/assets/5b8a412f-65f8-4083-b8b6-b37185f5a48b)
+
 
 <!-- <b>Upstash Server:</b> [Click here](https://console.upstash.com/redis) <br>
 <b>DagsHub:</b> [Click here](https://dagshub.com/ronylpatil/youtube-comment-analyzer) <br>
