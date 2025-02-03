@@ -1,14 +1,14 @@
-version: 0.0
+version: 0.0      # can give any version
 os: linux
 files:
-  - source: /
-    destination: /home/ubuntu/app
+  - source: /         # file is on root dir of github repo
+    destination: /home/ubuntu/app         # will be moved to this location of EC2 instance 
 hooks:
-  BeforeInstall:
+  BeforeInstall:      # here we will install req dependencies, and clean up 
     - location: deploy/scripts/install_dependencies.sh
       timeout: 300
       runas: ubuntu
-  ApplicationStart:
+  ApplicationStart:     # once server ready run the container and server the api
     - location: deploy/scripts/start_docker.sh
       timeout: 300
       runas: ubuntu

@@ -1,21 +1,21 @@
 #!/bin/bash
 
-# Update the package list 
+# update the package list 
 sudo apt-get update -y
 
-#Install Ruby (required by the CodeDeploy agent)
+# install Ruby (required by the CodeDeploy agent)
 sudo apt-get install ruby -y
 
-# Download the CodeDeploy agent installer from the correct region
+# download the CodeDeploy agent installer from the correct region
 wget https://aws-codedeploy-ap-southeast-2.s3.ap-southeast-2.amazonaws.com/latest/install
 
-#Make the installer executable
+# make the installer executable
 chmod +x ./install
 
-#Install the CodeDeploy agent.
+# install the CodeDeploy agent.
 sudo ./install auto
 
-#Start the CodeDeploy agent 
+# start the CodeDeploy agent 
 sudo service codedeploy-agent start
 
 ---->> sudo cat /var/log/cloud-init-output.log ==> ye cmd userscript ka log show kregi, jisse hume pta chalega ki kuch error to nahi aaya
@@ -40,8 +40,6 @@ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/home/ubuntu
 unzip -o /home/ubuntu/awscliv2.zip -d /home/ubuntu/
 sudo /home/ubuntu/aws/install
 
-
-
 sudo usermod -aG docker ubuntu - allows the ubuntu user to run Docker commands without needing to use sudo every time
 
 Blog: https://medium.com/@srijaanaparthy/step-by-step-guide-to-install-docker-on-ubuntu-in-aws-a39746e5a63d
@@ -65,6 +63,9 @@ docker system prune - cleanup unused containers, network and dangling images (-a
 -------------- Deployment Steps (Application Load Balancer - Auto Scaling Group - Launch Template - CodeDeploy)
 
 
-
-
+1. create security groups for ALB and ASG (ASG instances should not be accessed through public ips)
+2. Now create ASG
+    |-- create Launch Template
+    |-- create Target Group
+    |-- 
 

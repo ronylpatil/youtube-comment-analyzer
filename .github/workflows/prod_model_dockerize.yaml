@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-    paths:                # if any changes detected in below dir then runner'll trigger cicd pipeline
+    paths: # if any changes detected in below dir then runner'll trigger cicd pipeline
       - src/**
       - .github/**
       - prod/**
@@ -11,40 +11,39 @@ on:
       - Dockerfile
       - dev_requirements.txt
       - docker_requirements.txt
-  pull_request: 
+  pull_request:
     branches:
       - main
 
 jobs:
-  pull-latest-model:   
-    name: pull latest production model         
+  pull-latest-model:
+    name: pull latest production model
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install Utilities     # install utilities required to fetch model from backend
+      - name: Install Utilities # install utilities required to fetch model from backend
         run: |
-            python -m pip install --upgrade pip
-            if [ -f dev_requirements.txt ]; then pip install -r dev_requirements.txt; fi 
+          python -m pip install --upgrade pip
+          if [ -f dev_requirements.txt ]; then pip install -r dev_requirements.txt; fi
 
-      - name: Pull Latest Model From Mlflow   # below script will executed and fetch the prod model
+      - name: Pull Latest Model From Mlflow # below script will executed and fetch the prod model
         run: |
           python ./prod/get_model.py ${{ secrets.mlflow_uri }} ${{ secrets.registered_model_name }} ${{ secrets.alias }}
 
       # - name: Print Current Directory          # for debuging purpoer, u can remove it
-        # run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/
+      # run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/
 
       # - name: Print Current Directory (inside prod)           # for debuging purpoer, u can remove it
       #   run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/
-      
-      - name: Upload Model Artifact            # save the artifacts so that we can utilise it in next stage     
+
+      - name: Upload Model Artifact # save the artifacts so that we can utilise it in next stage
         uses: actions/upload-artifact@v4
         with:
           name: artifacts
-          # in path give correct repository name as here "cicd-aws/cicd-aws" 
-          path: | 
+          path: |
             /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model/model.joblib    
             /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model/model_details.json
             /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/prod_model/vectorizer.joblib
@@ -55,21 +54,21 @@ jobs:
       # - name: Print Current Directory Outside prod_model          # for debuging purpoer, u can remove it
       #   run: ls /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/prod/
 
-  build-nd-push-docker-image:  
-    name: build & push img to ECR   
-    needs: pull-latest-model      # previous stage must be successfully completed (job dependency)
+  build-nd-push-docker-image:
+    name: build & push img to ECR
+    needs: pull-latest-model # previous stage must be successfully completed (job dependency)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download Model Artifacts           # download the previously saved artifacts
+      - name: Download Model Artifacts # download the previously saved artifacts
         uses: actions/download-artifact@v4
         with:
           name: artifacts
           path: /home/runner/work/youtube-comment-analyzer/youtube-comment-analyzer/
-      
+
       # login to ecr
       - name: login to AWS ECR
         if: success()
@@ -79,7 +78,7 @@ jobs:
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 471112948185.dkr.ecr.us-east-1.amazonaws.com
 
       # build docker image
-      - name: Build Docker Image  
+      - name: Build Docker Image
         if: success()
         run: |
           docker build --build-arg REDIS_HOST=${{ secrets.REDIS_HOST }} --build-arg REDIS_KEY=${{ secrets.REDIS_KEY }} -t youtube-chrome-plugin .
@@ -89,10 +88,9 @@ jobs:
         if: success()
         run: |
           docker tag youtube-chrome-plugin:latest 471112948185.dkr.ecr.us-east-1.amazonaws.com/youtube-chrome-plugin:latest
-      
+
       # push docker img to ecr
       - name: Push Docker Image
         if: success()
         run: |
           docker push 471112948185.dkr.ecr.us-east-1.amazonaws.com/youtube-chrome-plugin:latest
-
