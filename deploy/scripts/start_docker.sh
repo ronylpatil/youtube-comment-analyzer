@@ -9,18 +9,18 @@ echo "Pulling Docker image..."
 docker pull 471112948185.dkr.ecr.us-east-1.amazonaws.com/youtube-chrome-plugin:latest
 
 echo "Checking for existing container..."
-if [ "$(docker ps -q -f name=ytca-app)" ]; then
+if [ "$(docker ps -q -f name=sentify-app)" ]; then
     echo "Stopping existing container..."
-    docker stop ytca-app
+    docker stop sentify-app
 fi
 
-if [ "$(docker ps -aq -f name=ytca-app)" ]; then
+if [ "$(docker ps -aq -f name=sentify-app)" ]; then
     echo "Removing existing container..."
-    docker rm ytca-app
+    docker rm sentify-app
 fi
 
-# container name: ytca-app
+# container name: sentify-app
 echo "Starting new container..."
-docker run -d -p 80:8000 --name ytca-app 471112948185.dkr.ecr.us-east-1.amazonaws.com/youtube-chrome-plugin:latest
+docker run -d -p 80:8000 --name sentify-app 471112948185.dkr.ecr.us-east-1.amazonaws.com/youtube-chrome-plugin:latest
 
 echo "Container started successfully."

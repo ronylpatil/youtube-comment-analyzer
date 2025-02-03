@@ -12,8 +12,8 @@ from fastapi.responses import JSONResponse  # type: ignore
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
 
 # redis server details
-redis_host = os.getenv("REDIS_HOST")  
-redis_key = os.getenv("REDIS_KEY") 
+redis_host = os.getenv("REDIS_HOST")
+redis_key = os.getenv("REDIS_KEY")
 root_dir = pathlib.Path(__file__).parent.parent
 
 # Create a custom log format
@@ -63,9 +63,7 @@ app.add_middleware(
 )
 
 # connecting with redis db
-rd = redis.Redis(
-    host=redis_host, port=6379, password=redis_key, ssl=True
-)
+rd = redis.Redis(host=redis_host, port=6379, password=redis_key, ssl=True)
 
 
 # define a Pydantic model for the prediction request
@@ -83,7 +81,7 @@ def get_cache_key(data: str) -> str:
     return hashlib.md5(data.encode()).hexdigest()
 
 
-def preprocessText(comment: str) -> str:  
+def preprocessText(comment: str) -> str:
     # remove emojies from comments
     emoji_pattern = re.compile(
         "["
@@ -168,9 +166,11 @@ def read_root() -> str:
 def get_model_info() -> JSONResponse:
     return model_details
 
+
 @app.get("/health")
 def health() -> JSONResponse:
     return JSONResponse(content={"status": "healthy"}, status_code=200)
+
 
 # [it will look for changes in whole project directory, to limit this score use --reload-dir ./dir_name]
 # server cmd: uvicorn api.rest_api:app --reload --reload-dir ./api --host 127.0.0.1 --port 8000

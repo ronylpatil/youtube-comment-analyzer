@@ -1,6 +1,11 @@
 ARG PYTHON_VERSION=3.10.3
 FROM python:${PYTHON_VERSION}-slim-buster as base
 
+# redis server details
+ARG REDIS_HOST
+ARG REDIS_KEY
+ENV REDIS_HOST=${REDIS_HOST} REDIS_KEY=${REDIS_KEY}
+
 # Expose the port that the application listens on.
 EXPOSE 8000
 
@@ -26,4 +31,6 @@ COPY docker_requirements.txt .
 RUN pip install --no-cache-dir -r docker_requirements.txt 
 
 # Run the application
+# 127.0.0.1, it means the service will only be accessible from within the EC2 instance itself, because 127.0.0.1
+# refers exclusively to the local machine. To make your service accessible externally, use 0.0.0.0, it listen all ip's
 CMD uvicorn api.rest_api:app --host 0.0.0.0 --port 8000
