@@ -21,12 +21,17 @@ Perform real-time sentiment analysis on live-streaming YouTube comments.
 [![css](https://img.shields.io/badge/css-blue?style=for-the-badge)]()
 [![js](https://img.shields.io/badge/javascript-grey?style=for-the-badge&logo=javascript)]()
 [![python](https://img.shields.io/badge/python-4682B4?style=for-the-badge&logo=python&logoColor=white)]()
+[![dvc](https://img.shields.io/badge/dvc-1CAC78?style=for-the-badge&logo=dvc&logoColor=white)]()
+[![mlflow](https://img.shields.io/badge/mlflow-6CB4EE?style=for-the-badge&logo=mlflow&logoColor=white)]()
+[![dagshub](https://img.shields.io/badge/dagshub-grey?style=for-the-badge&logo=dagshub&logoColor=white)]()
+[![redis](https://img.shields.io/badge/redis-black?style=for-the-badge&logo=redis&logoColor=red)]()
 [![sklearn](https://img.shields.io/badge/scikit%20learn-black?style=for-the-badge&logo=scikit-learn&logoColor=white)]()
 [![fastapi](https://img.shields.io/badge/fastapi-2E8B57?style=for-the-badge&logo=fastapi&logoColor=white)]()
 [![pytest](https://img.shields.io/badge/pytest-B22222?style=for-the-badge&logo=pytest&logoColor=white)]()
 [![github_actions](https://img.shields.io/badge/github%20actions-grey?style=for-the-badge&logo=github-actions&logoColor=white)]()
 [![docker](https://img.shields.io/badge/docker-blue?style=for-the-badge&logo=docker&logoColor=white)]()
 [![aws](https://img.shields.io/badge/aws-orange?style=for-the-badge&logo=amazon&logoColor=black)]()
+
 
 
 
